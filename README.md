@@ -4,6 +4,8 @@
 
 Convert query parameters from API urls to MongoDB queries !
 
+**⚠️Work in progress⚠️**
+
 This project was inspired by [api-query-params](https://github.com/loris/api-query-params) (JS Library).
 
 ## Features:
