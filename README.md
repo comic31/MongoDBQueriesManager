@@ -1,6 +1,8 @@
 # MongoDBQueriesManager
 ![GitHub](https://img.shields.io/github/license/comic31/MongoDBQueriesManager?style=for-the-badge)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?style=for-the-badge)](code_of_conduct.md)
+![PyPI](https://img.shields.io/pypi/v/mongo-queries-manager?style=for-the-badge)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mongo-queries-manager?style=for-the-badge)
 
 Convert query parameters from API urls to MongoDB queries !
 
@@ -12,6 +14,7 @@ This project was inspired by [api-query-params](https://github.com/loris/api-que
 - **Powerful**: Supports most of MongoDB operators ($in, $regexp, ...) and features (nested objects, type casting, ...)
 - **Agnostic**: Works with any web frameworks (Flask, Sanic, ...) and/or MongoDB libraries (pymongo, motor, ...)
 - **Simple**: ~150 LOC, Python typing
+- **Tested**: 100% tested
 
 ## Installation:
 ```shell script
@@ -30,15 +33,21 @@ Converts `string_query` into a MongoDB query dict.
 
 ###### Returns
 The resulting dictionary contains the following properties:
-- `filter`: Contains the query criteria
-- `sort`: Contains the sort criteria (cursor modifiers)
-- `skip`: Contains the skip criteria (cursor modifiers)
-- `limit`:  Contains the limit criteria (cursor modifiers)
+- `filter`: Contains the query criteria.
+- `sort`: Contains the sort criteria (cursor modifiers).
+- `skip`: Contains the skip criteria (cursor modifiers).
+- `limit`:  Contains the limit criteria (cursor modifiers).
 
 ###### Exception
 In case of error the following exception was raised:
 
-- `MongoDBQueriesManagerError`: This exception was raised if the library fail to parse query. Contains `raison` attribute.
+- `MongoDBQueriesManagerBaseError`: Base MongoDBQueriesManager errors.
+- `SkipError`: Raised when skip is negative / bad value.
+- `LimitError`: Raised when limit is negative / bad value.
+- `ListOperatorError`: Raised list operator was not possible.
+- `FilterError`: Raised when parse filter method fail to find a valid match.
+
+
 
 ###### Examples:
 ```python
