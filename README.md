@@ -15,7 +15,7 @@ This project was inspired by [api-query-params](https://github.com/loris/api-que
 
 ## Installation:
 ```shell script
-pipenv install mongodb-queries-manager
+pipenv install mongo-queries-manager
 ```
 
 ## Usages:
@@ -46,7 +46,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-from mongodb_querie_manager import mqm
+from mongo_queries_manager import mqm
 
 client: MongoClient = MongoClient('localhost', 27017)
 db: Database = client['test-database']
