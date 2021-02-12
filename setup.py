@@ -1,12 +1,11 @@
 import pathlib
 from setuptools import setup, find_packages
 
-PATH = pathlib.Path(__file__).parent
-
-README = (PATH / "README.md").read_text()
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 setup(
-    name='mongodb-queries-manager',
+    name='mongo-queries-manager',
     version='0.0.1',
     packages=find_packages(exclude=("tests", "examples")),
     url='https://github.com/comic31/MongoDBQueriesManager',
@@ -15,7 +14,7 @@ setup(
     author_email='theodangla32@gmail.com',
     include_package_data=True,
     description='Convert query parameters from API urls to MongoDB queries !',
-    long_description=README,
+    long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
         'dateparser>=1.0.0',
