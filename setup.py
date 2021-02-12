@@ -6,7 +6,7 @@ PATH = pathlib.Path(__file__).parent
 README = (PATH / "README.md").read_text()
 
 setup(
-    name='MongoDBQueriesManager',
+    name='mongodb-queries-manager',
     version='0.0.1',
     packages=find_packages(exclude=("tests", "examples")),
     url='https://github.com/comic31/MongoDBQueriesManager',
