@@ -1,12 +1,12 @@
 # MongoDBQueriesManager
-![GitHub](https://img.shields.io/github/license/comic31/MongoDBQueriesManager?style=for-the-badge)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?style=for-the-badge)](code_of_conduct.md)
+![Codecov](https://img.shields.io/codecov/c/github/comic31/MongoDBQueriesManager?style=for-the-badge)
+![Travis (.com)](https://img.shields.io/travis/com/comic31/MongoDBQueriesManager?style=for-the-badge)
 ![PyPI](https://img.shields.io/pypi/v/mongo-queries-manager?style=for-the-badge)
+![GitHub](https://img.shields.io/github/license/comic31/MongoDBQueriesManager?style=for-the-badge)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mongo-queries-manager?style=for-the-badge)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?style=for-the-badge)](code_of_conduct.md)
 
 Convert query parameters from API urls to MongoDB queries !
-
-**⚠️Work in progress⚠️**
 
 This project was inspired by [api-query-params](https://github.com/loris/api-query-params) (JS Library).
 
