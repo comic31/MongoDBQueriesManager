@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+dateparser = "*"
+pymongo = "*"
+
+[dev-packages]
+ipython = "*"
+pytest = "*"
+mypy = "*"
+coverage = "*"
+tox = "*"
+pytest-ordering = "*"
+bumpversion = "*"
+twine = "*"
+
+[requires]
+python_version = "3.8"
