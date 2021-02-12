@@ -10,23 +10,23 @@ from dateparser import parse
 
 
 class MongoDBQueriesManagerBaseError(Exception):
-    pass
+    """ Base MongoDBQueriesManager errors. """
 
 
 class SkipError(MongoDBQueriesManagerBaseError):
-    pass
+    """ Raised when skip is negative / bad value."""
 
 
 class LimitError(MongoDBQueriesManagerBaseError):
-    pass
+    """ Raised when limit is negative / bad value. """
 
 
 class ListOperatorError(MongoDBQueriesManagerBaseError):
-    pass
+    """ Raised list operator was not possible. """
 
 
 class FilterError(MongoDBQueriesManagerBaseError):
-    pass
+    """ Raised when parse filter method fail to find a valid match. """
 
 
 class MongoDBQueriesManager:
@@ -114,8 +114,8 @@ class MongoDBQueriesManager:
         if operator != '':
             try:
                 key, value = filter_params.split(operator)
-            except ValueError:
-                raise FilterError(f'Fail to split filter {filter_params} with operator {operator}')
+            except ValueError as err:
+                raise FilterError(f'Fail to split filter {filter_params} with operator {operator}') from err
         else:
             key, value = '', filter_params
 
@@ -135,7 +135,7 @@ class MongoDBQueriesManager:
 
         # $exists logic
         if operator in ['', '!']:
-            return {value: {cls.mongodb_operator[operator]: False if operator == '!' else True}}
+            return {value: {cls.mongodb_operator[operator]: bool(operator == '')}}
 
         # $gt, $gte, $lt, $lte, $ne, logic
         return {key: {cls.mongodb_operator[operator]: value}}
@@ -182,8 +182,8 @@ class MongoDBQueriesManager:
 
         try:
             limit_value = int(limit_param.split('=')[1])
-        except ValueError:
-            raise LimitError('Bad limit value')
+        except ValueError as err:
+            raise LimitError('Bad limit value') from err
 
         if limit_value < 0:
             raise LimitError('Negative limit value')
@@ -206,8 +206,8 @@ class MongoDBQueriesManager:
 
         try:
             skip_value = int(skip_param.split('=')[1])
-        except ValueError:
-            raise SkipError('Bad skip value')
+        except ValueError as err:
+            raise SkipError('Bad skip value') from err
 
         if skip_value < 0:
             raise SkipError('Negative skip value')
