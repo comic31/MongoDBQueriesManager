@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.2 (2021-02-12)
+## 0.1.0 (2021-02-12)
 * Added:
     - Tests (Operators, types, sort, skip, limit, errors).
     - New custom exception (SkipError, LimitError, ListOperatorError, FilterError), inherit from MongoDBQueriesManagerBaseError.
