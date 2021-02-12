@@ -6,10 +6,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-try:
-    from mongodb_querie_manager import mqm
-except ImportError:
-    from src import mqm
+from mongo_queries_manager import mqm
 
 if __name__ == '__main__':
     client: MongoClient = MongoClient('localhost', 27017)
