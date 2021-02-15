@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = mongo_queries_manager
+source = mongo_queries_manager/
 
 [report]
 exclude_lines =
