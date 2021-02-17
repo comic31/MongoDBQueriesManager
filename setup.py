@@ -30,6 +30,6 @@ setup(
         'Environment :: Web Environment',
         'Topic :: Database',
         'Topic :: System :: Networking',
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
     ],
 )
