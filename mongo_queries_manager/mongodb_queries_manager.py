@@ -3,7 +3,7 @@
 # Copyright (c) Modos Team, 2020
 
 import re
-from typing import Dict, Any, Optional, Tuple, List, Union
+from typing import Dict, Any, Optional, Tuple, List, Union, Callable
 
 import pymongo
 from dateparser import parse
@@ -27,6 +27,10 @@ class ListOperatorError(MongoDBQueriesManagerBaseError):
 
 class FilterError(MongoDBQueriesManagerBaseError):
     """ Raised when parse filter method fail to find a valid match. """
+
+
+class CustomCasterFail(MongoDBQueriesManagerBaseError):
+    """ Raised when a custom cast fail. """
 
 
 class MongoDBQueriesManager:
@@ -65,42 +69,12 @@ class MongoDBQueriesManager:
         "none": lambda none: None,
     }
 
-    @classmethod
-    def find_operator(cls, filter_params: str) -> str:
-        """Return the right operator
+    custom_cast_dict: Optional[Dict[str, Callable]]
 
-        Args:
-            filter_params (str): Filter params (ie, 'name=John'):
+    def __init__(self, casters: Optional[Dict[str, Callable]] = None) -> None:
+        self.custom_cast_dict = casters
 
-        Returns:
-            str: Return operator
-        """
-        for operator in ['<=', '>=', '!=', '=', '>', '<', '!']:
-            if filter_params.find(operator) > -1:
-                return operator
-        return ''
-
-    @classmethod
-    def cast_value_logic(cls, value: str) -> Any:
-        """ Cast value into right type
-
-        Args:
-            value (str): Value to cast
-
-        Returns:
-            Any: Casted value
-        """
-        for regex, cast in cls.regex_dict.items():
-            if isinstance(regex, re.Pattern):
-                if regex.match(value):
-                    return cast(value)
-            else:
-                if regex == value.lower():
-                    return cast(value)
-        return value
-
-    @classmethod
-    def filter_logic(cls, filter_params: str) -> Dict[str, Any]:
+    def filter_logic(self, filter_params: str) -> Dict[str, Any]:
         """ Build filter
 
         Args:
@@ -109,7 +83,7 @@ class MongoDBQueriesManager:
         Returns:
             Dict[str, Any]: Dictionary with MongoDB filter
         """
-        operator = cls.find_operator(filter_params=filter_params)
+        operator = self.find_operator(filter_params=filter_params)
 
         if operator != '':
             try:
@@ -119,7 +93,7 @@ class MongoDBQueriesManager:
         else:
             key, value = '', filter_params
 
-        value = cls.cast_value_logic(value)
+        value = self.cast_value_logic(value)
 
         # $eq logic
         if not isinstance(value, list) and operator == '=':
@@ -135,13 +109,56 @@ class MongoDBQueriesManager:
 
         # $exists logic
         if operator in ['', '!']:
-            return {value: {cls.mongodb_operator[operator]: bool(operator == '')}}
+            return {value: {self.mongodb_operator[operator]: bool(operator == '')}}
 
         # $gt, $gte, $lt, $lte, $ne, logic
-        return {key: {cls.mongodb_operator[operator]: value}}
+        return {key: {self.mongodb_operator[operator]: value}}
 
-    @classmethod
-    def sort_logic(cls, sort_params: str) -> Optional[List[Tuple]]:
+    def cast_value_logic(self, value: str) -> Any:
+        """ Cast value into right type
+
+        Args:
+            value (str): Value to cast
+
+        Returns:
+            Any: Casted value
+        """
+        if self.custom_cast_dict is not None:
+            for rule, func in self.custom_cast_dict.items():
+                if value.startswith(f'{rule}(') and value.endswith(')'):
+                    try:
+                        casted_value = func(value.replace(f'{rule}(', '')[:-1])
+                    except Exception as err:
+                        raise CustomCasterFail(f'Fail to cast {value} with caster {rule}') from err
+
+                    return casted_value
+
+        for regex, cast in self.regex_dict.items():
+            if isinstance(regex, re.Pattern):
+                if regex.match(value):
+                    return cast(value)
+            else:
+                if regex == value.lower():
+                    return cast(value)
+        return value
+
+    @staticmethod
+    def find_operator(filter_params: str) -> str:
+        """Return the right operator
+
+        Args:
+            filter_params (str): Filter params (ie, 'name=John'):
+
+        Returns:
+            str: Return operator
+        """
+        for operator in ['<=', '>=', '!=', '=', '>', '<', '!']:
+            if filter_params.find(operator) > -1:
+                return operator
+        return ''
+
+    @staticmethod
+    def sort_logic(sort_params: str) -> Optional[List[Tuple]]:
         """ Convert query sort value into MongoDB format
 
         Notes:
@@ -167,8 +184,8 @@ class MongoDBQueriesManager:
             return sort_params_final
         return None
 
-    @classmethod
-    def limit_logic(cls, limit_param: str) -> int:
+    @staticmethod
+    def limit_logic(limit_param: str) -> int:
         """ Convert query limit value into MongoDB format
 
         Args:
@@ -190,8 +207,8 @@ class MongoDBQueriesManager:
 
         return limit_value
 
-    @classmethod
-    def skip_logic(cls, skip_param: str) -> int:
+    @staticmethod
+    def skip_logic(skip_param: str) -> int:
         """ Convert query skip value into MongoDB format
 
         Args:
