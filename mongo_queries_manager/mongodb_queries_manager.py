@@ -101,10 +101,15 @@ class MongoDBQueriesManager:
 
         # $in, $nin, $exists logic
         if isinstance(value, list):
+            # Cast list items
+            casted_list_item = list()
+            for item in value:
+                casted_list_item.append(self.cast_value_logic(item))
+
             if operator == '=':
-                return {key: {"$in": value}}
+                return {key: {"$in": casted_list_item}}
             if operator == '!=':
-                return {key: {"$nin": value}}
+                return {key: {"$nin": casted_list_item}}
             raise ListOperatorError('List operator not found')
 
         # $exists logic
