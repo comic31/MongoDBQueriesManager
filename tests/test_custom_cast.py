@@ -21,10 +21,13 @@ class TestCustomCast:
         def parse_custom_list(custom_list: str) -> List[str]:
             return custom_list.split(';')
 
-        query_result = mqm(string_query="price=string(5)&name=John&in_stock=custom_list(1;2;3;4)",
+        query_result = mqm(string_query="price=string(5)&name=John&in_stock=custom_list(1;2;3;4)&"
+                                        "in_stock_string=custom_list(string(1);string(2);string(3);string(4))",
                            casters={'string': str, 'custom_list': parse_custom_list})
 
-        assert query_result == {'filter': {'price': '5', 'name': 'John', 'in_stock': {'$in': ['1', '2', '3', '4']}},
+        assert query_result == {'filter': {'price': '5', 'name': 'John',
+                                           'in_stock': {'$in': [1, 2, 3, 4]},
+                                           'in_stock_string': {'$in': ['1', '2', '3', '4']}},
                                 'sort': None, 'skip': 0, 'limit': 0}
 
     # Test bad custom type
