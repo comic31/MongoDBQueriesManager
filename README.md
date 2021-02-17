@@ -173,7 +173,8 @@ from mongo_queries_manager import mqm
 def parse_custom_list(custom_list: str) -> List[str]:
         return custom_list.split(';')
 
-query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_stock=custom_list(1;2;3;4)", 
+query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_stock=custom_list(1;2;3;4)&"
+                                    "in_stock_string=custom_list(string(1);string(2);string(3);string(4))", 
                                     casters={'string': str, 'custom_list': parse_custom_list})
 
 #{
@@ -181,7 +182,8 @@ query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_st
 # {
 #   'price': '5',
 #   'name': 'John',
-#   'in_stock': {'$in': ['1', '2', '3', '4']}
+#   'in_stock': {'$in': [1, 2, 3, 4]},
+#   'in_stock_string': {'$in': ['1', '2', '3', '4']}
 #   },
 #   'sort': None,
 #   'skip': 0,
