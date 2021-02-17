@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='mongo-queries-manager',
-    version='0.1.1',
+    version='0.1.2',
     packages=find_packages(exclude=("tests", "examples")),
     url='https://github.com/comic31/MongoDBQueriesManager',
     license='MIT',
