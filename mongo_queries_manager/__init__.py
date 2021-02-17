@@ -2,11 +2,11 @@
 # coding: utf-8
 # Copyright (c) Modos Team, 2020
 
-from typing import Dict, Any
+from typing import Dict, Any, Callable, Optional, List
 from urllib import parse
 
 from .mongodb_queries_manager import MongoDBQueriesManager, MongoDBQueriesManagerBaseError, SkipError, LimitError, \
-    ListOperatorError, FilterError
+    ListOperatorError, FilterError, CustomCasterFail
 
 __version__ = "0.1.0"
 
@@ -17,19 +17,23 @@ __all__ = [
     'LimitError',
     'ListOperatorError',
     'FilterError',
+    'CustomCasterFail',
 ]
 
 
-def mqm(string_query: str) -> Dict[str, Any]:
+def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dict[str, Any]:
     """ This method convert a string query into a MongoDB query dict.
 
     Args:
-        string_query:
+        string_query (str): A query string of the requested API URL.
+        casters (Optional[Dict[str, Callable]]):
 
     Returns:
-
+        Dict[str, Any]: Return a mongodb query in dict format
     """
-    args = list(parse.unquote(string_query).split('&'))
+    args: List[str] = list(parse.unquote(string_query).split('&'))
+
+    mongodb_queries_mgr: MongoDBQueriesManager = MongoDBQueriesManager(casters=casters)
 
     mongodb_query: Dict[str, Any] = {'filter': {},
                                      'sort': None,
@@ -39,13 +43,13 @@ def mqm(string_query: str) -> Dict[str, Any]:
 
     for arg in args:
         if arg.startswith('sort='):
-            mongodb_query['sort'] = MongoDBQueriesManager.sort_logic(sort_params=arg)
+            mongodb_query['sort'] = mongodb_queries_mgr.sort_logic(sort_params=arg)
         elif arg.startswith('limit='):
-            mongodb_query['limit'] = MongoDBQueriesManager.limit_logic(limit_param=arg)
+            mongodb_query['limit'] = mongodb_queries_mgr.limit_logic(limit_param=arg)
         elif arg.startswith('skip='):
-            mongodb_query['skip'] = MongoDBQueriesManager.skip_logic(skip_param=arg)
+            mongodb_query['skip'] = mongodb_queries_mgr.skip_logic(skip_param=arg)
         elif arg != '':
             mongodb_query['filter'] = {**mongodb_query['filter'],
-                                       **MongoDBQueriesManager.filter_logic(filter_params=arg)}
+                                       **mongodb_queries_mgr.filter_logic(filter_params=arg)}
 
     return mongodb_query
