@@ -26,7 +26,7 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
 
     Args:
         string_query (str): A query string of the requested API URL.
-        casters (Optional[Dict[str, Callable]]):
+        casters (Optional[Dict[str, Callable]]): Custom caster dict, used to define custom type
 
     Returns:
         Dict[str, Any]: Return a mongodb query in dict format
