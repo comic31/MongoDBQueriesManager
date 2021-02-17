@@ -23,13 +23,14 @@ pipenv install mongo-queries-manager
 
 ## Usages:
 ### Api
-`mqm(string_query: str) -> Dict[str, Any]:`
+`mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dict[str, Any]`
 
 ##### Description
 Converts `string_query` into a MongoDB query dict.
 
 ##### Arguments
 - `string_query`: query string of the requested API URL (ie, `frist_name=John&limit=10`), Works with url encoded. [required]
+- `casters`: Custom caster dict, used to define custom type (ie, `casters={'string': str}` / `price=string(5.5)` -> `{'price': '5'}`) [optional]
 
 ##### Returns
 The resulting dictionary contains the following properties:
@@ -46,7 +47,7 @@ In case of error the following exception was raised:
 - `LimitError`: Raised when limit is negative / bad value.
 - `ListOperatorError`: Raised list operator was not possible.
 - `FilterError`: Raised when parse filter method fail to find a valid match.
-
+- `CustomCasterFail`: Raised when a custom cast fail.
 
 ##### Examples:
 
@@ -155,6 +156,34 @@ mongodb_query: Dict[str, Any] = mqm(string_query="sort=created_at,-_id,+price")
 #{
 #   'filter': {},
 #   'sort': [('created_at', 1), ('_id', -1), ('price', 1)],
+#   'skip': 0,
+#   'limit': 0
+#}
+```
+
+#### Custom caster:
+- Used to define custom type
+- Optional parameter
+
+```python
+from typing import Dict, Any, List
+
+from mongo_queries_manager import mqm
+
+def parse_custom_list(custom_list: str) -> List[str]:
+        return custom_list.split(';')
+
+query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_stock=custom_list(1;2;3;4)", 
+                                    casters={'string': str, 'custom_list': parse_custom_list})
+
+#{
+# 'filter':
+# {
+#   'price': '5',
+#   'name': 'John',
+#   'in_stock': {'$in': ['1', '2', '3', '4']}
+#   },
+#   'sort': None,
 #   'skip': 0,
 #   'limit': 0
 #}
