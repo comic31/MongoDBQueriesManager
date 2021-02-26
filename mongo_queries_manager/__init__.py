@@ -48,6 +48,8 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
             mongodb_query['limit'] = mongodb_queries_mgr.limit_logic(limit_param=arg)
         elif arg.startswith('skip='):
             mongodb_query['skip'] = mongodb_queries_mgr.skip_logic(skip_param=arg)
+        elif arg.startswith('populate='):
+            pass
         elif arg != '':
             mongodb_query['filter'] = {**mongodb_query['filter'],
                                        **mongodb_queries_mgr.filter_logic(filter_params=arg)}
