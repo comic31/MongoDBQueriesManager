@@ -34,3 +34,9 @@ def test_operator_error():
         query_result = mqm(string_query="flag==toto")
 
     assert excinfo.value.__str__() == 'Fail to split filter flag==toto with operator ='
+
+
+def test_ignore_populate():
+    query_result = mqm(string_query="status=5&populate=pet")
+
+    assert query_result == {'filter': {"status": 5}, 'sort': None, 'skip': 0, 'limit': 0}
