@@ -110,6 +110,8 @@ result = collection.find(**mongodb_query)
 | `$exists` | `!key`               | `!email`                | `{'filter': {'email': {'$exists': False}}}`                                   |
 | `$regex`  | `key=/value/<opts>`  | `email=/@gmail\.com$/i` | `{'filter': {'email': re.compile('/@gmail.com$/i')}}`                         |
 | `$regex`  | `key!=/value/<opts>` | `phone!=/^06/`          | `{'filter': {'phone': { '$not': re.compile('/^06/')}}}`                       |
+| `$text`   | `$text=val`          | `$text=toto -java`      | `{'filter': {'$text': { '$search': toto -java}}}`                             |
+| `$text`   | `$text=val`          | `$text=/^06/`           | `{'filter': {'$text': { '$search': re.compile('/^06/')}}}`                             |
 
 #### Skip / Limit operators:
 
