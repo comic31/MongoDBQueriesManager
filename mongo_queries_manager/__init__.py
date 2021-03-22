@@ -6,7 +6,7 @@ from typing import Dict, Any, Callable, Optional, List
 from urllib import parse
 
 from .mongodb_queries_manager import MongoDBQueriesManager, MongoDBQueriesManagerBaseError, SkipError, LimitError, \
-    ListOperatorError, FilterError, CustomCasterFail
+    ListOperatorError, FilterError, CustomCasterFail, TextOperatorError
 
 __version__ = "0.1.3"
 
@@ -18,6 +18,7 @@ __all__ = [
     'ListOperatorError',
     'FilterError',
     'CustomCasterFail',
+    'TextOperatorError',
 ]
 
 
@@ -48,6 +49,10 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
             mongodb_query['limit'] = mongodb_queries_mgr.limit_logic(limit_param=arg)
         elif arg.startswith('skip='):
             mongodb_query['skip'] = mongodb_queries_mgr.skip_logic(skip_param=arg)
+        elif arg.startswith('$text='):
+            mongodb_query['filter'] = \
+                {**mongodb_query['filter'],
+                 **{'$text': {'$search': mongodb_queries_mgr.text_operator_logic(text_param=arg)}}}
         elif arg.startswith('populate='):
             pass
         elif arg != '':
