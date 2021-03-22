@@ -193,7 +193,8 @@ class MongoDBQueriesManager:
             return sort_params_final
         return None
 
-    def text_operator_logic(self, text_param: str) -> str:
+    @staticmethod
+    def text_operator_logic(text_param: str) -> str:
         """ Convert text query value into MongoDB format
 
         Args:
@@ -205,7 +206,7 @@ class MongoDBQueriesManager:
         if text_param == "$text=":
             raise TextOperatorError('Bad $text value')
 
-        return self.cast_value_logic(text_param.split('=')[1])
+        return text_param.split('=')[1]
 
     @staticmethod
     def limit_logic(limit_param: str) -> int:
