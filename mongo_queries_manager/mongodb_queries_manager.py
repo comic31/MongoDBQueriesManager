@@ -29,6 +29,10 @@ class FilterError(MongoDBQueriesManagerBaseError):
     """ Raised when parse filter method fail to find a valid match. """
 
 
+class TextOperatorError(MongoDBQueriesManagerBaseError):
+    """ Raised when parse text operator contain an empty string. """
+
+
 class CustomCasterFail(MongoDBQueriesManagerBaseError):
     """ Raised when a custom cast fail. """
 
@@ -188,6 +192,20 @@ class MongoDBQueriesManager:
                     sort_params_final.append((param, pymongo.ASCENDING))
             return sort_params_final
         return None
+
+    def text_operator_logic(self, text_param: str) -> str:
+        """ Convert text query value into MongoDB format
+
+        Args:
+            text_param (str): Text param from url query (ie, '$text=java shop -coffee')
+
+        Returns:
+            int: Limit integer value
+        """
+        if text_param == "$text=":
+            raise TextOperatorError('Bad $text value')
+
+        return self.cast_value_logic(text_param.split('=')[1])
 
     @staticmethod
     def limit_logic(limit_param: str) -> int:
