@@ -11,10 +11,10 @@ Convert query parameters from API urls to MongoDB queries !
 This project was inspired by [api-query-params](https://github.com/loris/api-query-params) (JS Library).
 
 ## Features:
-- **Powerful**: Supports most of MongoDB operators ($in, $regexp, ...) and features (nested objects, type casting, ...)
+- **Powerful**: Supports most of MongoDB operators ($in, $regexp, ...) and features (nested objects, type casting, projection...)
 - **Agnostic**: Works with any web frameworks (Flask, Sanic, ...) and/or MongoDB libraries (pymongo, motor, ...)
-- **Simple**: ~150 LOC, Python typing
-- **Tested**: 100% tested
+- **Simple**: ~300 LOC, Python typing
+- **Tested**: 100% code coverage
 
 ## Installation:
 ```shell script
@@ -35,6 +35,7 @@ Converts `string_query` into a MongoDB query dict.
 ##### Returns
 The resulting dictionary contains the following properties:
 - `filter`: Contains the query criteria.
+- `projection`: Contains the query projection
 - `sort`: Contains the sort criteria (cursor modifiers).
 - `skip`: Contains the skip criteria (cursor modifiers).
 - `limit`:  Contains the limit criteria (cursor modifiers).
@@ -47,7 +48,9 @@ In case of error the following exception was raised:
 - `LimitError`: Raised when limit is negative / bad value.
 - `ListOperatorError`: Raised list operator was not possible.
 - `FilterError`: Raised when parse filter method fail to find a valid match.
+- `TextOperatorError`: Raised when parse text operator contain an empty string.
 - `CustomCasterFail`: Raised when a custom cast fail.
+- `ProjectionError`: Raised when projection json is invalid.
 
 ##### Examples:
 
@@ -56,7 +59,7 @@ In case of error the following exception was raised:
 from mongo_queries_manager import mqm
 
 mongodb_query = mqm(string_query="status=sent&price>=5.6&active=true&timestamp>"
-                                 "2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp")
+                                 "2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp&fields=-_id,-created_at")
 
 #{
 #   'filter':
@@ -67,6 +70,7 @@ mongodb_query = mqm(string_query="status=sent&price>=5.6&active=true&timestamp>"
 #           'timestamp': {'$gt': datetime.datetime(2016, 1, 1, 0, 0)},
 #           'author.firstName': re.compile('/john/i')
 #       },
+#   'projection': {'_id': 0, 'created_at': 0},
 #   'sort': [('timestamp', -1)],
 #   'skip': 50,
 #   'limit': 100
@@ -128,6 +132,7 @@ mongodb_query: Dict[str, Any] = mqm(string_query="skip=50&limit=50")
 #{
 #   'filter': {},
 #   'sort': None,
+#   'projection': None,
 #   'skip': 50,
 #   'limit': 50
 #}
@@ -136,6 +141,7 @@ mongodb_query: Dict[str, Any] = mqm(string_query="skip=&limit=")
 #{
 #   'filter': {},
 #   'sort': None,
+#   'projection': None,
 #   'skip': 0,
 #   'limit': 0
 #}
@@ -158,6 +164,50 @@ mongodb_query: Dict[str, Any] = mqm(string_query="sort=created_at,-_id,+price")
 #{
 #   'filter': {},
 #   'sort': [('created_at', 1), ('_id', -1), ('price', 1)],
+#   'projection': None,
+#   'skip': 0,
+#   'limit': 0
+#}
+```
+
+#### Projection operator:
+- Useful to limit fields to return in each records.
+- It accepts a comma-separated list of fields. Default behavior is to specify fields to return. Use - prefixes to return all fields except some specific fields.
+- Due to a MongoDB limitation, you cannot combine inclusion and exclusion semantics in a single projection with the exception of the _id field.
+- It also accepts JSON string to use more powerful projection operators ($, $elemMatch or $slice)
+
+```python
+from typing import Dict, Any
+
+from mongo_queries_manager import mqm
+
+mongodb_query: Dict[str, Any] = mqm(string_query="fields=-_id,-price")
+#{
+#   'filter': {},
+#   'sort': None,
+#   'projection': {'_id': 0, 'price': 0},
+#   'skip': 0,
+#   'limit': 0
+#}
+
+
+mongodb_query: Dict[str, Any] = mqm(string_query="fields=_id,price")
+
+#{
+#   'filter': {},
+#   'sort': None,
+#   'projection': {'_id': 1, 'price': 1},
+#   'skip': 0,
+#   'limit': 0
+#}
+
+
+mongodb_query: Dict[str, Any] = mqm(string_query='fields={"games": {"$elemMatch":{"score": {"$gt": 5}}}},joined,lastLogin')
+
+#{
+#   'filter': {},
+#   'sort': None,
+#   'projection': {'games': {'$elemMatch': {'score': {'$gt': 5}}}, 'joined': 1, 'lastLogin': 1}},
 #   'skip': 0,
 #   'limit': 0
 #}
@@ -188,6 +238,7 @@ query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_st
 #   'in_stock_string': {'$in': ['1', '2', '3', '4']}
 #   },
 #   'sort': None,
+#   'projection': None,
 #   'skip': 0,
 #   'limit': 0
 #}
