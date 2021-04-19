@@ -14,7 +14,7 @@ class TestCustomCast:
     def test_custom_cast(self):
         query_result = mqm(string_query="price=string(5)", casters={'string': str})
 
-        assert query_result == {'filter': {'price': '5'}, 'sort': None, 'skip': 0, 'limit': 0}
+        assert query_result == {'filter': {'price': '5'}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
 
     def test_custom_cast_2(self):
 
@@ -28,7 +28,7 @@ class TestCustomCast:
         assert query_result == {'filter': {'price': '5', 'name': 'John',
                                            'in_stock': {'$in': [1, 2, 3, 4]},
                                            'in_stock_string': {'$in': ['1', '2', '3', '4']}},
-                                'sort': None, 'skip': 0, 'limit': 0}
+                                'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
 
     # Test bad custom type
     def test_custom_cast_fail(self):

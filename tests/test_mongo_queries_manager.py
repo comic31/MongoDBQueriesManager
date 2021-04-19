@@ -12,7 +12,7 @@ from mongo_queries_manager import mqm, ListOperatorError, FilterError
 def test_empty_url_query():
     query_result = mqm(string_query="")
 
-    assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0}
+    assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
 
 
 def test_list_operator_error():
@@ -39,4 +39,4 @@ def test_operator_error():
 def test_ignore_populate():
     query_result = mqm(string_query="status=5&populate=pet")
 
-    assert query_result == {'filter': {"status": 5}, 'sort': None, 'skip': 0, 'limit': 0}
+    assert query_result == {'filter': {"status": 5}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
