@@ -17,7 +17,6 @@ setup(
     long_description_content_type="text/markdown",
     install_requires=[
         'dateparser>=1.0.0',
-        'pymongo>=3.11.3'
     ],
     classifiers=[
         'Intended Audience :: Developers',
