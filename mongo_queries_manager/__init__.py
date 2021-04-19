@@ -6,7 +6,7 @@ from typing import Dict, Any, Callable, Optional, List
 from urllib import parse
 
 from .mongodb_queries_manager import MongoDBQueriesManager, MongoDBQueriesManagerBaseError, SkipError, LimitError, \
-    ListOperatorError, FilterError, CustomCasterFail, TextOperatorError
+    ListOperatorError, FilterError, CustomCasterFail, TextOperatorError, ProjectionError
 
 __version__ = "0.1.5"
 
@@ -19,6 +19,7 @@ __all__ = [
     'FilterError',
     'CustomCasterFail',
     'TextOperatorError',
+    'ProjectionError'
 ]
 
 
@@ -38,6 +39,7 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
 
     mongodb_query: Dict[str, Any] = {'filter': {},
                                      'sort': None,
+                                     'projection': None,
                                      'skip': 0,
                                      'limit': 0,
                                      }
@@ -49,6 +51,8 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
             mongodb_query['limit'] = mongodb_queries_mgr.limit_logic(limit_param=arg)
         elif arg.startswith('skip='):
             mongodb_query['skip'] = mongodb_queries_mgr.skip_logic(skip_param=arg)
+        elif arg.startswith('fields='):
+            mongodb_query['projection'] = mongodb_queries_mgr.projection_logic(projection_param=arg)
         elif arg.startswith('$text='):
             mongodb_query['filter'] = \
                 {**mongodb_query['filter'],
