@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 dateparser = "*"
-pymongo = "*"
 
 [dev-packages]
 ipython = "*"
@@ -17,6 +16,7 @@ pytest-ordering = "*"
 bumpversion = "*"
 twine = "*"
 pylint = "*"
+pymongo = "*"
 
 [requires]
 python_version = "3.8"
