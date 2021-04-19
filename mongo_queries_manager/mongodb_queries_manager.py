@@ -3,10 +3,15 @@
 # Copyright (c) Modos Team, 2020
 
 import re
+import json
 from typing import Dict, Any, Optional, Tuple, List, Union, Callable
 
-import pymongo
 from dateparser import parse
+
+ASCENDING = 1
+"""Ascending sort order."""
+DESCENDING = -1
+"""Descending sort order."""
 
 
 class MongoDBQueriesManagerBaseError(Exception):
@@ -37,6 +42,10 @@ class CustomCasterFail(MongoDBQueriesManagerBaseError):
     """ Raised when a custom cast fail. """
 
 
+class ProjectionError(MongoDBQueriesManagerBaseError):
+    """ Raised when projection json is invalid. """
+
+
 class MongoDBQueriesManager:
     """ MongoDBQueriesManager class.
 
@@ -59,14 +68,14 @@ class MongoDBQueriesManager:
     }
 
     regex_dict: Dict[Union[str, re.Pattern], Any] = {
-        re.compile(r"^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$"): float,
-        re.compile(r"^[-+]?\d+$"): int,
-        re.compile(r"^[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T|"
-                   r" )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$"):
+        re.compile(r'^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$'): float,
+        re.compile(r'^[-+]?\d+$'): int,
+        re.compile(r'^[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T|'
+                   r' )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$'):
             lambda date: parse(date, languages=['fr', 'en']),
-        re.compile(r"^\w+(?=(,?,))(?:\1\w+)+$"): lambda list_value: list_value.split(','),
-        re.compile(r"\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)"
-                   r"\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)"): re.compile,
+        re.compile(r'^\w+(?=(,?,))(?:\1\w+)+$'): lambda list_value: list_value.split(','),
+        re.compile(r'\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)'
+                   r'\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)'): re.compile,
         "true": lambda boolean: True,
         "false": lambda boolean: False,
         "null": lambda null: None,
@@ -168,7 +177,7 @@ class MongoDBQueriesManager:
 
     @staticmethod
     def sort_logic(sort_params: str) -> Optional[List[Tuple]]:
-        """ Convert query sort value into MongoDB format
+        """ Convert sort query into MongoDB format
 
         Notes:
             Work if `sort=` into url query
@@ -177,7 +186,7 @@ class MongoDBQueriesManager:
             sort_params (str): Sort param from url query (ie, 'sort=-created_at')
 
         Returns:
-            Optional[List[Tuple]]: Tuple with MongoDB sort info
+            Optional[List[Tuple]]: Optional tuple with MongoDB sort values
         """
         sort_params_final: List[Tuple] = list()
         value = sort_params.split('=')[1]
@@ -185,17 +194,17 @@ class MongoDBQueriesManager:
         if value:
             for param in value.split(','):
                 if param.startswith('+'):
-                    sort_params_final.append((param[1:], pymongo.ASCENDING))
+                    sort_params_final.append((param[1:], ASCENDING))
                 elif param.startswith('-'):
-                    sort_params_final.append((param[1:], pymongo.DESCENDING))
+                    sort_params_final.append((param[1:], DESCENDING))
                 else:
-                    sort_params_final.append((param, pymongo.ASCENDING))
+                    sort_params_final.append((param, ASCENDING))
             return sort_params_final
         return None
 
     @staticmethod
     def text_operator_logic(text_param: str) -> str:
-        """ Convert text query value into MongoDB format
+        """ Convert text query into MongoDB format
 
         Args:
             text_param (str): Text param from url query (ie, '$text=java shop -coffee')
@@ -210,7 +219,7 @@ class MongoDBQueriesManager:
 
     @staticmethod
     def limit_logic(limit_param: str) -> int:
-        """ Convert query limit value into MongoDB format
+        """ Convert limit query into MongoDB format
 
         Args:
             limit_param (str): Limit param from url query (ie, 'limit=5')
@@ -233,7 +242,7 @@ class MongoDBQueriesManager:
 
     @staticmethod
     def skip_logic(skip_param: str) -> int:
-        """ Convert query skip value into MongoDB format
+        """ Convert skip query into MongoDB format
 
         Args:
             skip_param (str): Skip param from url query (ie, 'limit=5')
@@ -241,7 +250,6 @@ class MongoDBQueriesManager:
         Returns:
             int: Skip integer value
         """
-
         if skip_param == 'skip=':
             return 0
 
@@ -254,3 +262,34 @@ class MongoDBQueriesManager:
             raise SkipError('Negative skip value')
 
         return skip_value
+
+    @staticmethod
+    def projection_logic(projection_param: str) -> Optional[Dict[str, Any]]:
+        """ Convert projection query into MongoDB format
+
+        Notes:
+            Work if `projection=` into url query
+
+        Args:
+            projection_param (str): Projection param from url query (ie, 'fields=id,url')
+
+        Returns:
+            Optional[Dict[str, Any]]: Optional dictionary with MongoDB projection values
+        """
+        projection_params_final: Dict[str, Any] = dict()
+        value = projection_param.split('=')[1]
+
+        if value:
+            for param in value.split(','):
+                if param.startswith('-'):
+                    projection_params_final[param[1:]] = 0
+                elif param.startswith('{') and param.endswith('}'):
+                    try:
+                        json_value = json.loads(param)
+                        projection_params_final[next(iter(json_value))] = json_value[next(iter(json_value))]
+                    except Exception as err:
+                        raise ProjectionError('Fail to decode projection') from err
+                else:
+                    projection_params_final[param] = 1
+            return projection_params_final
+        return None
