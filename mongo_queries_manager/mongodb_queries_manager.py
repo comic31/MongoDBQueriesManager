@@ -264,7 +264,7 @@ class MongoDBQueriesManager:
         return skip_value
 
     @staticmethod
-    def projection_logic(projection_param: str) -> Optional[Dict[str, Any]]:
+    def projection_logic(projection_param: str, population: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         """ Convert projection query into MongoDB format
 
         Notes:
@@ -272,6 +272,7 @@ class MongoDBQueriesManager:
 
         Args:
             projection_param (str): Projection param from url query (ie, 'fields=id,url')
+            population (List[Dict[str, Any]]): Population query values
 
         Returns:
             Optional[Dict[str, Any]]: Optional dictionary with MongoDB projection values
@@ -279,17 +280,31 @@ class MongoDBQueriesManager:
         projection_params_final: Dict[str, Any] = dict()
         value = projection_param.split('=')[1]
 
-        if value:
-            for param in value.split(','):
-                if param.startswith('-'):
-                    projection_params_final[param[1:]] = 0
-                elif param.startswith('{') and param.endswith('}'):
-                    try:
-                        json_value = json.loads(param)
-                        projection_params_final[next(iter(json_value))] = json_value[next(iter(json_value))]
-                    except Exception as err:
-                        raise ProjectionError('Fail to decode projection') from err
-                else:
-                    projection_params_final[param] = 1
-            return projection_params_final
-        return None
+        if value == '':
+            return None
+
+        for param in value.split(','):
+            if param.find('.') > 0:
+                pop_field = param[1:].split('.', 1) if param.startswith('-') else param.split('.', 1)
+                found = False
+                for pop in population:
+                    if pop['path'] == pop_field[0]:
+                        if not pop.get('projection'):
+                            pop['projection'] = {}
+                        pop['projection'][pop_field[1]] = 0 if param.startswith('-') else 1
+                        found = True
+                        break
+                if found:
+                    continue
+
+            if param.startswith('-'):
+                projection_params_final[param[1:]] = 0
+            elif param.startswith('{') and param.endswith('}'):
+                try:
+                    json_value = json.loads(param)
+                    projection_params_final[next(iter(json_value))] = json_value[next(iter(json_value))]
+                except Exception as err:
+                    raise ProjectionError('Fail to decode projection') from err
+            else:
+                projection_params_final[param] = 1
+        return projection_params_final
