@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7
+* Added: 
+    - Population logic with projection
+    - Population tests
+* Changed:
+    - Tests, add Population into dict returns
+  
 ## 0.1.6
 * Added: 
     - Mongo projection logic
