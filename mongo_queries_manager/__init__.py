@@ -39,10 +39,20 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
 
     mongodb_query: Dict[str, Any] = {'filter': {},
                                      'sort': None,
-                                     'projection': None,
                                      'skip': 0,
                                      'limit': 0,
+                                     'projection': None,
+                                     'population': [],
                                      }
+
+    populates = []
+    for arg in args:
+        if arg.startswith('populate='):
+            if arg != 'populate=':
+                populates = arg.split('=')[1].split(',') if arg.split('=')[1].find(',') > 0 else [arg.split('=')[1]]
+
+    for populate in populates:
+        mongodb_query['population'].append({'path': populate, 'projection': None})
 
     for arg in args:
         if arg.startswith('sort='):
@@ -52,7 +62,8 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
         elif arg.startswith('skip='):
             mongodb_query['skip'] = mongodb_queries_mgr.skip_logic(skip_param=arg)
         elif arg.startswith('fields='):
-            mongodb_query['projection'] = mongodb_queries_mgr.projection_logic(projection_param=arg)
+            mongodb_query['projection'] = mongodb_queries_mgr.projection_logic(projection_param=arg,
+                                                                               population=mongodb_query['population'])
         elif arg.startswith('$text='):
             mongodb_query['filter'] = \
                 {**mongodb_query['filter'],
