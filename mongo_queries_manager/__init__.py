@@ -23,11 +23,12 @@ __all__ = [
 ]
 
 
-def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dict[str, Any]:
+def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None, populate: bool = False) -> Dict[str, Any]:
     """ This method convert a string query into a MongoDB query dict.
 
     Args:
         string_query (str): A query string of the requested API URL.
+        populate (bool): Add population into returned query (Manual implementation)
         casters (Optional[Dict[str, Callable]]): Custom caster dict, used to define custom type
 
     Returns:
@@ -42,17 +43,20 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
                                      'skip': 0,
                                      'limit': 0,
                                      'projection': None,
-                                     'population': [],
                                      }
 
-    populates = []
-    for arg in args:
-        if arg.startswith('populate='):
-            if arg != 'populate=':
-                populates = arg.split('=')[1].split(',') if arg.split('=')[1].find(',') > 0 else [arg.split('=')[1]]
+    if populate:
+        mongodb_query['population'] = []
 
-    for populate in populates:
-        mongodb_query['population'].append({'path': populate, 'projection': None})
+        populates_values = []
+        for arg in args:
+            if arg.startswith('populate='):
+                if arg != 'populate=':
+                    populates_values = arg.split('=')[1].split(',') if \
+                        arg.split('=')[1].find(',') > 0 else [arg.split('=')[1]]
+
+        for populate_value in populates_values:
+            mongodb_query['population'].append({'path': populate_value, 'projection': None})
 
     for arg in args:
         if arg.startswith('sort='):
@@ -62,8 +66,12 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dic
         elif arg.startswith('skip='):
             mongodb_query['skip'] = mongodb_queries_mgr.skip_logic(skip_param=arg)
         elif arg.startswith('fields='):
-            mongodb_query['projection'] = mongodb_queries_mgr.projection_logic(projection_param=arg,
-                                                                               population=mongodb_query['population'])
+            if populate:
+                mongodb_query['projection'] = \
+                    mongodb_queries_mgr.projection_logic(projection_param=arg, population=mongodb_query['population'])
+            else:
+                mongodb_query['projection'] = \
+                    mongodb_queries_mgr.projection_logic(projection_param=arg, population=None)
         elif arg.startswith('$text='):
             mongodb_query['filter'] = \
                 {**mongodb_query['filter'],

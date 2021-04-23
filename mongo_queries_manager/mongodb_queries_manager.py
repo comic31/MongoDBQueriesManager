@@ -264,7 +264,7 @@ class MongoDBQueriesManager:
         return skip_value
 
     @staticmethod
-    def projection_logic(projection_param: str, population: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    def projection_logic(projection_param: str, population: Optional[List[Dict[str, Any]]]) -> Optional[Dict[str, Any]]:
         """ Convert projection query into MongoDB format
 
         Notes:
@@ -272,7 +272,7 @@ class MongoDBQueriesManager:
 
         Args:
             projection_param (str): Projection param from url query (ie, 'fields=id,url')
-            population (List[Dict[str, Any]]): Population query values
+            population (Optional[List[Dict[str, Any]]]): Optional population query values
 
         Returns:
             Optional[Dict[str, Any]]: Optional dictionary with MongoDB projection values
@@ -284,7 +284,7 @@ class MongoDBQueriesManager:
             return None
 
         for param in value.split(','):
-            if param.find('.') > 0:
+            if population and param.find('.') > 0:
                 pop_field = param[1:].split('.', 1) if param.startswith('-') else param.split('.', 1)
                 found = False
                 for pop in population:
