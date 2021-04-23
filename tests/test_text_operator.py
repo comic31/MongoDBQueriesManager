@@ -13,13 +13,13 @@ class TestTextOperator:
         query_result = mqm(string_query="$text=toto")
 
         assert query_result == {'filter': {'$text': {'$search': 'toto'}}, 'sort': None,
-                                'skip': 0, 'limit': 0, 'projection': None, 'population': []}
+                                'skip': 0, 'limit': 0, 'projection': None}
 
     def test_good_text_operator2(self):
         query_result = mqm(string_query='$text="toto"')
 
         assert query_result == {'filter': {'$text': {'$search': '"toto"'}}, 'sort': None,
-                                'skip': 0, 'limit': 0, 'projection': None, 'population': []}
+                                'skip': 0, 'limit': 0, 'projection': None}
 
     # Skip bad tests part
     def test_empty_test_operator(self):

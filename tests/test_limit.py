@@ -12,12 +12,12 @@ class TestLimit:
     def test_good_limit(self):
         query_result = mqm(string_query="limit=5")
 
-        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 5, 'projection': None, 'population': []}
+        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 5, 'projection': None}
 
     def test_empty_limit(self):
         query_result = mqm(string_query="limit=")
 
-        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None, 'population': []}
+        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
 
     # Limit bad tests part
     def test_bad_limit_neg(self):

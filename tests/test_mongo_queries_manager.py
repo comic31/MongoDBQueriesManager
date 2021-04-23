@@ -12,7 +12,7 @@ from mongo_queries_manager import mqm, ListOperatorError, FilterError
 def test_empty_url_query():
     query_result = mqm(string_query="")
 
-    assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None, 'population': []}
+    assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
 
 
 def test_list_operator_error():

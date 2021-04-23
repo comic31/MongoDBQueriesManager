@@ -9,25 +9,25 @@ from mongo_queries_manager import mqm
 
 class TestPopulation:
     def test_empty_population(self):
-        query_result = mqm(string_query="populate=")
+        query_result = mqm(string_query="populate=", populate=True)
 
         assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None, 'population': []}
 
     def test_simple_population(self):
-        query_result = mqm(string_query="populate=user")
+        query_result = mqm(string_query="populate=user", populate=True)
 
         assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0,
                                 'projection': None, 'population': [{'path': 'user', 'projection': None}]}
 
     def test_multi_population(self):
-        query_result = mqm(string_query="populate=user,settings")
+        query_result = mqm(string_query="populate=user,settings", populate=True)
 
         assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0,
                                 'projection': None, 'population': [{'path': 'user', 'projection': None},
                                                                    {'path': 'settings', 'projection': None}]}
 
     def test_simple_population_with_projection(self):
-        query_result = mqm(string_query="fields=-created_at,-updated_at,hives.label&populate=hives")
+        query_result = mqm(string_query="fields=-created_at,-updated_at,hives.label&populate=hives", populate=True)
 
         assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0,
                                 'projection': {'created_at': 0, 'updated_at': 0},
@@ -35,7 +35,7 @@ class TestPopulation:
 
     def test_multi_population_with_multi_projection(self):
         query_result = mqm(string_query="fields=-created_at,-updated_at,hives.label,hives._id,"
-                                        "data.temperature&populate=hives,data")
+                                        "data.temperature&populate=hives,data", populate=True)
 
         assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0,
                                 'projection': {'created_at': 0, 'updated_at': 0},
