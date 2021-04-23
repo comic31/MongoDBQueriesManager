@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8
+* Changed: 
+    - Population is now optional (default False)
+* Changed:
+    - Tests, fix population into dict returns (optional)
+
 ## 0.1.7
 * Added: 
     - Population logic with projection
