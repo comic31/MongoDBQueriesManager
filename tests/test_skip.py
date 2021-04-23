@@ -12,12 +12,12 @@ class TestSkip:
     def test_good_skip(self):
         query_result = mqm(string_query="skip=5")
 
-        assert query_result == {'filter': {}, 'sort': None, 'skip': 5, 'limit': 0, 'projection': None}
+        assert query_result == {'filter': {}, 'sort': None, 'skip': 5, 'limit': 0, 'projection': None, 'population': []}
 
     def test_empty_skip(self):
         query_result = mqm(string_query="skip=")
 
-        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
+        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None, 'population': []}
 
     # Skip bad tests part
     def test_bad_skip_neg(self):
