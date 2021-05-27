@@ -23,11 +23,13 @@ __all__ = [
 ]
 
 
-def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None, populate: bool = False) -> Dict[str, Any]:
+def mqm(string_query: str, blacklist: Optional[List[str]] = None, casters: Optional[Dict[str, Callable]] = None,
+        populate: bool = False) -> Dict[str, Any]:
     """ This method convert a string query into a MongoDB query dict.
 
     Args:
         string_query (str): A query string of the requested API URL.
+        blacklist (Optional[List[str]]): Filter on all keys except the ones specified.
         populate (bool): Add population into returned query (Manual implementation)
         casters (Optional[Dict[str, Callable]]): Custom caster dict, used to define custom type
 
@@ -59,6 +61,16 @@ def mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None, popula
             mongodb_query['population'].append({'path': populate_value, 'projection': None})
 
     for arg in args:
+
+        if blacklist:
+            found: bool = False
+            for blacklist_value in blacklist:
+                if arg.startswith(f'{blacklist_value}='):
+                    found = True
+                    break
+            if found:
+                continue
+
         if arg.startswith('sort='):
             mongodb_query['sort'] = mongodb_queries_mgr.sort_logic(sort_params=arg)
         elif arg.startswith('limit='):
