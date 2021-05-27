@@ -8,7 +8,7 @@ from urllib import parse
 from .mongodb_queries_manager import MongoDBQueriesManager, MongoDBQueriesManagerBaseError, SkipError, LimitError, \
     ListOperatorError, FilterError, CustomCasterFail, TextOperatorError, ProjectionError
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 __all__ = [
     'mqm',
