@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9
+* Added: 
+    - Blacklist logic
+    - Tests on blacklist logic
+
 ## 0.1.8
 * Changed: 
     - Population is now optional (default False)
