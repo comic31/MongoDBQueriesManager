@@ -307,4 +307,4 @@ class MongoDBQueriesManager:
                     raise ProjectionError('Fail to decode projection') from err
             else:
                 projection_params_final[param] = 1
-        return projection_params_final
+        return projection_params_final if projection_params_final != {} else None
