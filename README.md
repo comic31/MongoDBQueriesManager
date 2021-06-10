@@ -13,7 +13,7 @@ This project was inspired by [api-query-params](https://github.com/loris/api-que
 ## Features:
 - **Powerful**: Supports most of MongoDB operators ($in, $regexp, ...) and features (nested objects, type casting, projection...)
 - **Agnostic**: Works with any web frameworks (Flask, Sanic, ...) and/or MongoDB libraries (pymongo, motor, ...)
-- **Simple**: ~300 LOC, Python typing
+- **Simple**: ~500 LOC, Python typing
 - **Tested**: 100% code coverage
 
 ## Installation:
@@ -23,7 +23,7 @@ pipenv install mongo-queries-manager
 
 ## Usages:
 ### Api
-`mqm(string_query: str, casters: Optional[Dict[str, Callable]] = None) -> Dict[str, Any]`
+`mqm(string_query: str, blacklist: Optional[List[str]] = None, casters: Optional[Dict[str, Callable]] = None, populate: bool = False) -> Dict[str, Any]:`
 
 ##### Description
 Converts `string_query` into a MongoDB query dict.
@@ -31,6 +31,8 @@ Converts `string_query` into a MongoDB query dict.
 ##### Arguments
 - `string_query`: query string of the requested API URL (ie, `frist_name=John&limit=10`), Works with url encoded. [required]
 - `casters`: Custom caster dict, used to define custom type (ie, `casters={'string': str}` / `price=string(5.5)` -> `{'price': '5'}`) [optional]
+- `blacklist`: Custom blacklist word, used to ignore specific value from query (ie, `blacklist=[where]` / `company=id,where=43.60,1.44,` -> `{'company': 'id'}`) [optional]
+- `populate`: A boolean value, used to activate the population logic (add a population field into returned dict)
 
 ##### Returns
 The resulting dictionary contains the following properties:
@@ -39,6 +41,7 @@ The resulting dictionary contains the following properties:
 - `sort`: Contains the sort criteria (cursor modifiers).
 - `skip`: Contains the skip criteria (cursor modifiers).
 - `limit`:  Contains the limit criteria (cursor modifiers).
+- `population`:  Contains the population criteria. (Only when populate arg is true. To use this population list, a manual implementation is required)
 
 ##### Exception
 In case of error the following exception was raised:
@@ -51,6 +54,8 @@ In case of error the following exception was raised:
 - `TextOperatorError`: Raised when parse text operator contain an empty string.
 - `CustomCasterFail`: Raised when a custom cast fail.
 - `ProjectionError`: Raised when projection json is invalid.
+- `LogicalPopulationError`: Raised when method fail to find logical population item.
+- `LogicalSubPopulationError`: Raised when method fail to find logical sub population item.
 
 ##### Examples:
 
