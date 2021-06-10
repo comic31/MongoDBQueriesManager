@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+* Added:
+    - New exception `LogicalPopulationError` & `LogicalSubPopulationError`
+    - New population & projection tests
+* Changed: 
+    - Clean docstrings
+    - Population logic (use recursion)
+    - Population projection logic (use recursion)
+
 ## 0.1.9
 * Added: 
     - Blacklist logic
