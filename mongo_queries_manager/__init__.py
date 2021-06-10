@@ -6,7 +6,8 @@ from typing import Dict, Any, Callable, Optional, List
 from urllib import parse
 
 from .mongodb_queries_manager import MongoDBQueriesManager, MongoDBQueriesManagerBaseError, SkipError, LimitError, \
-    ListOperatorError, FilterError, CustomCasterFail, TextOperatorError, ProjectionError
+    ListOperatorError, FilterError, CustomCasterFail, TextOperatorError, ProjectionError, LogicalPopulationError, \
+    LogicalSubPopulationError
 
 __version__ = "0.1.9"
 
@@ -19,22 +20,38 @@ __all__ = [
     'FilterError',
     'CustomCasterFail',
     'TextOperatorError',
-    'ProjectionError'
+    'ProjectionError',
+    'LogicalPopulationError',
+    'LogicalSubPopulationError'
 ]
 
 
-def mqm(string_query: str, blacklist: Optional[List[str]] = None, casters: Optional[Dict[str, Callable]] = None,
+def _sort_population(populate: str) -> int:
+    """ Used to sort population list by level (.) into populate value.
+
+        Args:
+            populate (str): Populate value.
+
+        Returns:
+            int: Return the number of . (level) into populate value.
+        """
+    return populate.count('.')
+
+
+def mqm(string_query: str,
+        blacklist: Optional[List[str]] = None,
+        casters: Optional[Dict[str, Callable]] = None,
         populate: bool = False) -> Dict[str, Any]:
     """ This method convert a string query into a MongoDB query dict.
 
     Args:
         string_query (str): A query string of the requested API URL.
         blacklist (Optional[List[str]]): Filter on all keys except the ones specified.
-        populate (bool): Add population into returned query (Manual implementation)
-        casters (Optional[Dict[str, Callable]]): Custom caster dict, used to define custom type
+        populate (bool): Add population into returned query (Manual implementation).
+        casters (Optional[Dict[str, Callable]]): Custom caster dict, used to define custom type.
 
     Returns:
-        Dict[str, Any]: Return a mongodb query in dict format
+        Dict[str, Any]: Return a mongodb query in dict format.
     """
     args: List[str] = list(parse.unquote(string_query).split('&'))
 
@@ -57,8 +74,8 @@ def mqm(string_query: str, blacklist: Optional[List[str]] = None, casters: Optio
                     populates_values = arg.split('=')[1].split(',') if \
                         arg.split('=')[1].find(',') > 0 else [arg.split('=')[1]]
 
-        for populate_value in populates_values:
-            mongodb_query['population'].append({'path': populate_value, 'projection': None})
+        for populate_value in sorted(populates_values, key=_sort_population):
+            mongodb_queries_mgr.format_populate_value(mongodb_query, population_value=populate_value)
 
     for arg in args:
 
