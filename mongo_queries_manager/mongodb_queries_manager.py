@@ -81,7 +81,7 @@ class MongoDBQueriesManager:
         re.compile(r'^[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T|'
                    r' )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$'):
             lambda date: parse(date, languages=['fr', 'en']),
-        re.compile(r'^\w+(?=(,?,))(?:\1\w+)+$'): lambda list_value: list_value.split(','),
+        re.compile(r'^[A-Za-z ]+(?=(,?,))(?:\1[A-Za-z ]+)+$'): lambda list_value: list_value.split(','),
         re.compile(r'\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)'
                    r'\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)'): re.compile,
         "true": lambda boolean: True,
