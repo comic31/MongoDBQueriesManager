@@ -9,7 +9,7 @@ from .mongodb_queries_manager import MongoDBQueriesManager, MongoDBQueriesManage
     ListOperatorError, FilterError, CustomCasterFail, TextOperatorError, ProjectionError, LogicalPopulationError, \
     LogicalSubPopulationError
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     'mqm',
