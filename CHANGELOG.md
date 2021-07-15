@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+* Fixed:
+    - Regex issue on list format with space
+
 ## 0.2.0
 * Added:
     - New exception `LogicalPopulationError` & `LogicalSubPopulationError`
