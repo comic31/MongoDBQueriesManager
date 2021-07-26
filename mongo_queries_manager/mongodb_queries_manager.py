@@ -287,7 +287,13 @@ class MongoDBQueriesManager:
         for current_population in population:
             if current_population['path'] == pop_field[0]:
                 if pop_field[1].find('.') >= 0:
-                    cls._iter_on_population(population=current_population['population'], field=pop_field[1], sign=sign)
+                    if 'population' not in current_population:
+                        if not current_population.get('projection'):
+                            current_population['projection'] = {}
+                        current_population['projection'][pop_field[1]] = sign
+                    else:
+                        cls._iter_on_population(population=current_population['population'],
+                                                field=pop_field[1], sign=sign)
                 else:
                     if not current_population.get('projection'):
                         current_population['projection'] = {}
