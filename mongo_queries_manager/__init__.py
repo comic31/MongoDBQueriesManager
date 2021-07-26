@@ -54,9 +54,7 @@ def mqm(string_query: str,
         Dict[str, Any]: Return a mongodb query in dict format.
     """
     args: List[str] = list(parse.unquote(string_query).split('&'))
-
     mongodb_queries_mgr: MongoDBQueriesManager = MongoDBQueriesManager(casters=casters)
-
     mongodb_query: Dict[str, Any] = {'filter': {},
                                      'sort': None,
                                      'skip': 0,
