@@ -205,3 +205,33 @@ class TestPopulation:
                                populate=True)
 
         assert excinfo.value.__str__() == 'Fail to find logical sub population item'
+
+    def test_sub_population_alex(self):
+        query_result = mqm(string_query="populate=animal,crossbreed,crossbreed.crossbreeds,company,service,"
+                                        "service.service_description,pet&fields=-company.settings.booking",
+                           populate=True)
+
+        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None,
+                                'population': [{'path': 'animal', 'projection': None},
+                                               {'path': 'crossbreed', 'projection': None, 'population': [
+                                                   {'path': 'crossbreeds', 'projection': None}]},
+                                               {'path': 'company', 'projection': {'settings.booking': 0}},
+                                               {'path': 'service', 'projection': None, 'population': [
+                                                   {'path': 'service_description', 'projection': None}]},
+                                               {'path': 'pet', 'projection': None}]}
+
+    def test_sub_population_alex_2(self):
+        query_result = mqm(string_query="populate=animal,crossbreed,crossbreed.crossbreeds,company,service,"
+                                        "service.service_description,pet&fields=-company.settings.booking,"
+                                        "-company.settings.toto",
+                           populate=True)
+
+        assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None,
+                                'population': [{'path': 'animal', 'projection': None},
+                                               {'path': 'crossbreed', 'projection': None, 'population': [
+                                                   {'path': 'crossbreeds', 'projection': None}]},
+                                               {'path': 'company', 'projection': {'settings.booking': 0,
+                                                                                  'settings.toto': 0}},
+                                               {'path': 'service', 'projection': None, 'population': [
+                                                   {'path': 'service_description', 'projection': None}]},
+                                               {'path': 'pet', 'projection': None}]}
