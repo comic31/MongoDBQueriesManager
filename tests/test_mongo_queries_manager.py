@@ -1,37 +1,41 @@
 #!/usr/bin/env python3
-# coding: utf-8
 # Copyright (c) Modos Team, 2020
+
+from __future__ import annotations
 
 import pytest
 
-from mongo_queries_manager import mqm, ListOperatorError, FilterError
-
-# "status=sent&toto=true&timestamp>2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp"
+from mongo_queries_manager import FilterError, ListOperatorError, mqm
 
 
-def test_empty_url_query():
+def test_empty_url_query() -> None:
     query_result = mqm(string_query="")
 
-    assert query_result == {'filter': {}, 'sort': None, 'skip': 0, 'limit': 0, 'projection': None}
+    assert query_result == {
+        "filter": {},
+        "sort": None,
+        "skip": 0,
+        "limit": 0,
+        "projection": None,
+    }
 
 
-def test_list_operator_error():
+def test_list_operator_error() -> None:
     with pytest.raises(ListOperatorError) as excinfo:
-        query_result = mqm(string_query="flag<=toto,titi,tutu")
+        _ = mqm(string_query="flag<=toto,titi,tutu")
 
-    assert excinfo.value.__str__() == 'List operator not found'
+    assert excinfo.value.__str__() == "List operator not found"
 
 
-def test_filter_error():
+def test_filter_error() -> None:
     with pytest.raises(FilterError) as excinfo:
-        query_result = mqm(string_query="flag==toto")
+        _ = mqm(string_query="flag==toto")
 
-    assert excinfo.value.__str__() == 'Fail to split filter flag==toto with operator ='
+    assert excinfo.value.__str__() == "Fail to split filter flag==toto with operator ="
 
 
-def test_operator_error():
+def test_operator_error() -> None:
     with pytest.raises(FilterError) as excinfo:
-        query_result = mqm(string_query="flag==toto")
+        _ = mqm(string_query="flag==toto")
 
-    assert excinfo.value.__str__() == 'Fail to split filter flag==toto with operator ='
-
+    assert excinfo.value.__str__() == "Fail to split filter flag==toto with operator ="
