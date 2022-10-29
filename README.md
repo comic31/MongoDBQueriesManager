@@ -12,13 +12,21 @@ This project was inspired by [api-query-params](https://github.com/loris/api-que
 
 ## Features:
 - **Powerful**: Supports most of MongoDB operators ($in, $regexp, ...) and features (nested objects, type casting, projection...)
-- **Agnostic**: Works with any web frameworks (Flask, Sanic, ...) and/or MongoDB libraries (pymongo, motor, ...)
+- **Agnostic**: Works with any web frameworks (Flask, Sanic, AIOHTTP, Django ...) and/or MongoDB libraries (pymongo, motor, ...)
 - **Simple**: ~500 LOC, Python typing
 - **Tested**: 100% code coverage
 
 ## Installation:
 ```shell script
+pip install mongo-queries-manager
+
+# OR
+
 pipenv install mongo-queries-manager
+
+# OR
+
+poetry add mongo-queries-manager
 ```
 
 ## Usages:
@@ -60,13 +68,14 @@ In case of error the following exception was raised:
 ##### Examples:
 
 **Simple demo**
+
 ```python
 from mongo_queries_manager import mqm
 
 mongodb_query = mqm(string_query="status=sent&price>=5.6&active=true&timestamp>"
                                  "2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp&fields=-_id,-created_at")
 
-#{
+# {
 #   'filter':
 #       {
 #           'status': 'sent',
@@ -79,10 +88,11 @@ mongodb_query = mqm(string_query="status=sent&price>=5.6&active=true&timestamp>"
 #   'sort': [('timestamp', -1)],
 #   'skip': 50,
 #   'limit': 100
-#}
+# }
 ```
 
 **Examples with PyMongo**
+
 ```python
 from typing import Dict, Any
 
@@ -97,7 +107,7 @@ db: Database = client['test-database']
 collection: Collection = db['test-collection']
 
 mongodb_query: Dict[str, Any] = mqm(string_query="status=sent&toto=true&timestamp>2016-01-01&"
-                                 "author.firstName=/john/i&limit=100&skip=50&sort=-timestamp")
+                                                 "author.firstName=/john/i&limit=100&skip=50&sort=-timestamp")
 
 result = collection.find(**mongodb_query)
 ```
@@ -134,30 +144,30 @@ from typing import Dict, Any
 from mongo_queries_manager import mqm
 
 mongodb_query: Dict[str, Any] = mqm(string_query="skip=50&limit=50")
-#{
+# {
 #   'filter': {},
 #   'sort': None,
 #   'projection': None,
 #   'skip': 50,
 #   'limit': 50
-#}
+# }
 
 mongodb_query: Dict[str, Any] = mqm(string_query="skip=&limit=")
-#{
+# {
 #   'filter': {},
 #   'sort': None,
 #   'projection': None,
 #   'skip': 0,
 #   'limit': 0
-#}
+# }
 ```
 
 #### Sort operator:
 - Used to sort returned records.
 - Default operator key is `sort`.
 - Support empty value (ie, `...&sort=&...`).
-- Sort accepts a comma-separated list of fields. 
-- Default behavior is to sort in ascending order. 
+- Sort accepts a comma-separated list of fields.
+- Default behavior is to sort in ascending order.
 - Use `-` prefixes to sort in descending order, use `+` prefixes to sort in ascending order.
 
 ```python
@@ -207,7 +217,8 @@ mongodb_query: Dict[str, Any] = mqm(string_query="fields=_id,price")
 #}
 
 
-mongodb_query: Dict[str, Any] = mqm(string_query='fields={"games": {"$elemMatch":{"score": {"$gt": 5}}}},joined,lastLogin')
+mongodb_query: Dict[str, Any] = mqm(
+    string_query='fields={"games": {"$elemMatch":{"score": {"$gt": 5}}}},joined,lastLogin')
 
 #{
 #   'filter': {},
@@ -227,12 +238,14 @@ from typing import Dict, Any, List
 
 from mongo_queries_manager import mqm
 
+
 def parse_custom_list(custom_list: str) -> List[str]:
-        return custom_list.split(';')
+    return custom_list.split(';')
+
 
 query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_stock=custom_list(1;2;3;4)&"
-                                    "in_stock_string=custom_list(string(1);string(2);string(3);string(4))", 
-                                    casters={'string': str, 'custom_list': parse_custom_list})
+                                                "in_stock_string=custom_list(string(1);string(2);string(3);string(4))",
+                                   casters={'string': str, 'custom_list': parse_custom_list})
 
 #{
 # 'filter':
@@ -247,4 +260,24 @@ query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_st
 #   'skip': 0,
 #   'limit': 0
 #}
+```
+
+
+## Contribution
+
+### Install all development dependencies
+
+```shell
+# Initialize a new virtual environment
+poetry shell
+
+# Install dev dependencies
+poetry install --with format,lint,type,tools,tests -E dateparser
+
+# Run tests
+nox
+
+# Pre commit (format / lint / type before commit)
+pre-commit install
+pre-commit run --all-files
 ```
