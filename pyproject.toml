@@ -1,6 +1,176 @@
-[build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+[tool.poetry]
+name='mongo-queries-manager'
+
+version = "1.0.0"
+
+description = "Convert query parameters from API urls to MongoDB queries !"
+
+authors = [
+    "Theo Dangla <theodangla32@gmail.com>",
 ]
-build-backend = "setuptools.build_meta"
+maintainers = [
+    "Theo Dangla <theodangla32@gmail.com>",
+]
+
+license = "MIT"
+
+readme = "README.md"
+
+packages = [
+    { include = "mongo_queries_manager" },
+]
+
+include = ["CHANGELOG.md", "README.md"]
+exclude = ["tests/**/*.py", "examples/**/*.py", "examples/**/*.py"]
+
+homepage = "https://pypi.org/project/mongo-queries-manager/"
+repository = "https://github.com/comic31/MongoDBQueriesManager"
+documentation = "https://github.com/comic31/MongoDBQueriesManager"
+
+keywords = ["query", "mongodb", "motor", "api", "request", "mongo-queries-manager"]
+
+classifiers = [
+        'Intended Audience :: Developers',
+        'Intended Audience :: Information Technology',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Operating System :: OS Independent',
+        'Environment :: Web Environment',
+        'Topic :: Database',
+        'Topic :: System :: Networking',
+        'Development Status :: 4 - Beta',
+]
+
+[tool.poetry.urls]
+Changelog = "https://github.com/comic31/MongoDBQueriesManager/blob/main/CHANGELOG.md"
+
+# Main dependencies
+[tool.poetry.dependencies]
+python = "^3.7"
+dateparser = { version = "^1.0.0", optional = true }
+
+[tool.poetry.extras]
+dateparser = ["dateparser"]
+
+
+# Tests dependencies
+[tool.poetry.group.tests]
+optional = true
+
+[tool.poetry.group.tests.dependencies]
+pytest = ">=6.2.0,<8.0.0"
+tox = "^3.20.0"
+coverage = {version = ">=6.0.0,<7.0.0", extras = ["toml"]}
+pymongo = "^4.0.0"
+
+
+# Format dependencies
+[tool.poetry.group.format]
+optional = true
+
+[tool.poetry.group.format.dependencies]
+black = "^22.1.0"
+isort = "^5.1.4"
+
+
+# Type dependencies
+[tool.poetry.group.type]
+optional = true
+
+[tool.poetry.group.type.dependencies]
+mypy = ">=0.940,<1"
+types-dateparser = "^1.1.4.1"
+
+
+# Lint dependencies
+[tool.poetry.group.lint]
+optional = true
+
+[tool.poetry.group.lint.dependencies]
+pylint = "^2.12.0"
+flake8 = ">=4.0.0,<5.0.0"
+flake8-html = "^0.4.2"
+
+
+# Tools dependencies
+[tool.poetry.group.tools]
+optional = true
+
+[tool.poetry.group.tools.dependencies]
+ipython = "^7.10.0"
+bump2version = "^1.0.0"
+pre-commit = "^2.18.0"
+
+
+# Isort configuration
+[tool.isort]
+py_version = 37
+profile = "black"
+combine_as_imports = true
+lines_between_types = 1
+lines_after_imports = 2
+src_paths = ["mongo_queries_manager", "tests", "examples"]
+
+
+# Black configuration
+[tool.black]
+target-version = ['py37']
+
+
+# MYPY configuration
+[tool.mypy]
+python_version = 3.7
+files = "mongo_queries_manager"
+mypy_path = "MongoDBQueriesManager"
+namespace_packages = true
+explicit_package_bases = true
+show_error_codes = true
+strict = true
+ignore_missing_imports = false
+strict_optional = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+
+
+# Pytest configuration
+[tool.pytest.ini_options]
+minversion = "6.2"
+addopts = "-ra -q"
+junit_suite_name = "junit_result.xml"
+junit_log_passing_tests = true
+junit_logging = "all"
+junit_duration_report = "total"
+testpaths = [
+    "tests"
+]
+
+
+# Converage run configuration
+[tool.coverage.run]
+branch = true
+source = ["mongo_queries_manager/"]
+
+
+# Black report configuration
+[tool.coverage.report]
+exclude_lines = [
+    "if self.debug:",
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:"
+]
+ignore_errors = true
+omit = [
+    "tests/*",
+]
+
+[build-system]
+requires = ["poetry-core>=1.1.0"]
+build-backend = "poetry.core.masonry.api"
