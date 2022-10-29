@@ -10,7 +10,39 @@ import re
 
 from datetime import datetime
 from typing import Any, Callable, Pattern
-from dateparser import parse
+
+
+try:
+    from dateparser import parse
+
+    def _date_parse(date: str) -> datetime | str:
+        """Cast string date into datetime using dateparse library (extra dep).
+
+        Args:
+            date (str): Date as string format.
+
+         Returns:
+            Optional[datetime]: Cast value.
+        """
+
+        return parse(date, languages=["fr", "en"]) or date
+
+except ModuleNotFoundError:
+
+    def _date_parse(date: str) -> datetime | str:
+        """Cast string date into datetime (only isoformat supported).
+
+        Args:
+            date (str): Date as string format.
+
+         Returns:
+            Optional[datetime]: Cast value.
+        """
+        try:
+            return datetime.fromisoformat(date)
+        except (ValueError, TypeError):
+            return date
+
 
 ASCENDING = 1  # Ascending sort order.
 
@@ -84,7 +116,7 @@ class MongoDBQueriesManager:
         re.compile(
             r"^[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T|"
             r" )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$"
-        ): parse,
+        ): _date_parse,
         re.compile(
             r"^[A-Za-z ]+(?=(,?,))(?:\1[A-Za-z ]+)+$"
         ): lambda list_value: list_value.split(","),
