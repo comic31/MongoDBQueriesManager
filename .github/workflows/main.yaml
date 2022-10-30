@@ -1,0 +1,136 @@
+name: Main workflow
+
+on:
+  push:
+    paths-ignore:
+      - 'examples/**'
+    branches:
+      - master
+      - develop
+  pull_request:
+    paths-ignore:
+      - 'examples/**'
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Tests on ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Setup up workflow test directory
+        run: mkdir ./reports
+
+      - name: Upgrade Pip and install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools wheel poetry
+          poetry config virtualenvs.create false
+          poetry install --with tests,lint,type,format -v
+
+      - name: Run mypy
+        run: mypy mongo_queries_manager
+        if: ${{ always() }}
+
+      - name: Run pylint
+        run: pylint mongo_queries_manager
+        if: ${{ always() }}
+
+      - name: Run flake8
+        run: flake8 mongo_queries_manager --format=html --htmldir=./reports/flake8-${{ matrix.python }}
+        if: ${{ always() }}
+
+      - name: Tar flake8 artifact
+        run: tar -cvf flake8-${{ matrix.python }}.tar ./reports/flake8-${{ matrix.python }}
+
+      - name: Archive flake8 artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: flake8-${{ matrix.python }}
+          path: flake8-${{ matrix.python }}.tar
+
+      - name: Run black
+        run: black mongo_queries_manager --check
+        if: ${{ always() }}
+
+      - name: Run Isort
+        run: isort mongo_queries_manager --check
+        if: ${{ always() }}
+
+      - name: Run Pytest without extra
+        run: coverage run --data-file=./reports/.coverage.without.extra -m pytest --junitxml=./reports/junit-results-without-extra-${{ matrix.python }}.xml --junit-prefix=without-extra-${{ matrix.python }} -vv
+        if: ${{ always() }}
+
+      - name: Archive Pytest artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-results-without-extra-${{ matrix.python }}
+          path: ./reports/junit-results-without-extra-${{ matrix.python }}.xml
+
+      - name: Install dateparser dependencies
+        run: |
+          poetry install -E dateparser -v
+
+      - name: Run Pytest with extra
+        run: coverage run --data-file=./reports/.coverage.with.extra -m pytest --junitxml=./reports/junit-results-with-extra-${{ matrix.python }}.xml --junit-prefix=with-extra-${{ matrix.python }} -vv
+        if: ${{ always() }}
+
+      - name: Archive Pytest artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-results-with-extra-${{ matrix.python }}
+          path: ./reports/junit-results-with-extra-${{ matrix.python }}.xml
+
+      - name: Combine coverage
+        run: coverage combine --append --data-file=./reports/.coverage.full ./reports/.coverage.without.extra ./reports/.coverage.with.extra
+
+      - name: Generate coverage HTML
+        run: coverage html --data-file=./reports/.coverage.full --directory=./reports/${{ matrix.python }}-coverage-full-html
+
+      - name: Tar files
+        run: tar -cvf ${{ matrix.python }}-coverage-full-html.tar ./reports/${{ matrix.python }}-coverage-full-html
+
+      - name: Archive code coverage HTML results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.python }}-coverage-full-html
+          path: ${{ matrix.python }}-coverage-full-html.tar
+
+      - name: Generate coverage XML
+        run: coverage xml --data-file=./reports/.coverage.full -o ./reports/coverage-${{ matrix.python }}-full.xml
+
+      - name: Archive code coverage XML results
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.python }}-full
+          path: ./reports/coverage-${{ matrix.python }}-full.xml
+
+      - name: Send code coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./reports
+          files: coverage-${{ matrix.python }}-full.xml
+          flags: pytests
+          fail_ci_if_error: true
+          verbose: true
