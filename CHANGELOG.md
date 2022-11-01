@@ -1,6 +1,8 @@
 # Changelog
 
 ## 1.0.0
+* Added:
+    - Support range filter
 * Changed:
     - `dateparser` is now an extra dependencies
     - As default without `dateparser` extra, mongo_queries_manager cast only isoformat string into datetime
