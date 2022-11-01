@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   build:
-    name: Tests on ${{ matrix.python }}
+    name: Tests on Python ${{ matrix.python }}  🐍
     runs-on: ubuntu-latest
     strategy:
       matrix:
