@@ -49,7 +49,7 @@ jobs:
           path: mongo-queries-manager-test-packages-${{ github.ref_name }}.tar
 
       - name: Publish Python package with Poetry on TestPyPi
-        run: poetry publish
+        run: poetry publish -r test-pypi
 
   publish_on_pypi:
     name: Build and publish to PyPI 🐍📦
