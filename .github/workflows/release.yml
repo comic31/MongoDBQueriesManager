@@ -1,0 +1,89 @@
+name: Publish package 📦 to PyPI and TestPyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_on_testpypi:
+        description: 'Publish on TestPyPi'
+        required: true
+        type: boolean
+      publish_on_pypi:
+        description: 'Publish on PyPi'
+        required: true
+        type: boolean
+
+jobs:
+  publish_on_testpypi:
+    name: Build and publish to TestPyPI 🐍📦
+    environment: release
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.publish_on_testpypi }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Upgrade Pip and install poetry
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools wheel poetry
+
+      - name: Configure Poetry
+        run: |
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+      - name: Build Python package with Poetry
+        run: poetry build
+
+      - name: Tar test build result
+        run: tar -cvf mongo-queries-manager-test-packages-${{ github.ref_name }}.tar ./dist
+
+      - name: Archive test packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: mongo-queries-manager-test-packages-${{ github.ref_name }}
+          path: mongo-queries-manager-test-packages-${{ github.ref_name }}.tar
+
+      - name: Publish Python package with Poetry on TestPyPi
+        run: poetry publish
+
+  publish_on_pypi:
+    name: Build and publish to PyPI 🐍📦
+    environment: release
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.publish_on_pypi }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Upgrade Pip and install poetry
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools wheel poetry
+
+      - name: Configure Poetry
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Build Python package with Poetry
+        run: poetry build
+
+      - name: Tar build result
+        run: tar -cvf mongo-queries-manager-packages-${{ github.ref_name }}.tar ./dist
+
+      - name: Archive packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: mongo-queries-manager-packages-${{ github.ref_name }}
+          path: mongo-queries-manager-packages-${{ github.ref_name }}.tar
+
+      - name: Publish Python package with Poetry on PyPi
+        run: poetry publish
