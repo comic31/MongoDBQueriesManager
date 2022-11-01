@@ -1,6 +1,6 @@
 # MongoDBQueriesManager
 [![Codecov](https://img.shields.io/codecov/c/github/comic31/MongoDBQueriesManager?style=for-the-badge)](https://app.codecov.io/gh/comic31/MongoDBQueriesManager)
-[![Travis (.com)](https://img.shields.io/travis/com/comic31/MongoDBQueriesManager?style=for-the-badge)](https://travis-ci.com/github/comic31/MongoDBQueriesManager)
+[![Main workflow](https://img.shields.io/github/workflow/status/comic31/MongoDBQueriesManager/Main%20workflow?style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/actions/workflows/main.yaml)
 [![PyPI](https://img.shields.io/pypi/v/mongo-queries-manager?style=for-the-badge)](https://pypi.org/project/mongo-queries-manager/)
 [![GitHub](https://img.shields.io/github/license/comic31/MongoDBQueriesManager?style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/blob/main/LICENSE)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mongo-queries-manager?style=for-the-badge)](https://pypi.org/project/mongo-queries-manager/)
@@ -18,16 +18,22 @@ This project was inspired by [api-query-params](https://github.com/loris/api-que
 
 
 ## Installation:
+
+> ⚠️ **In version 1.0.0 dateparser is an extra dependencies**
+
 ```shell script
 pip install mongo-queries-manager
+pip install mongo-queries-manager['dateparser']
 
 # OR
 
 pipenv install mongo-queries-manager
+pipenv install mongo-queries-manager['dateparser']
 
 # OR
 
 poetry add mongo-queries-manager
+poetry add mongo-queries-manager['dateparser']
 ```
 
 ## Usages:
