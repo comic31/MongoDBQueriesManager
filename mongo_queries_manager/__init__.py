@@ -131,9 +131,15 @@ def mqm(
         elif arg.startswith("populate="):
             pass
         elif arg != "":
-            mongodb_query["filter"] = {
-                **mongodb_query["filter"],
-                **mongodb_queries_mgr.filter_logic(filter_params=arg),
-            }
+            for key, sub_filter in mongodb_queries_mgr.filter_logic(
+                filter_params=arg
+            ).items():
+                if key in mongodb_query["filter"]:
+                    mongodb_query["filter"][key] = {
+                        **mongodb_query["filter"][key],
+                        **sub_filter,
+                    }
+                else:
+                    mongodb_query["filter"][key] = sub_filter
 
     return mongodb_query
