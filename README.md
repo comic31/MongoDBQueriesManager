@@ -11,10 +11,11 @@ Convert query parameters from API urls to MongoDB queries !
 This project was inspired by [api-query-params](https://github.com/loris/api-query-params) (JS Library).
 
 ## Features:
-- **Powerful**: Supports most of MongoDB operators ($in, $regexp, ...) and features (nested objects, type casting, projection...)
+- **Powerful**: Supports most of MongoDB operators ($in, $regexp, ...) and features (nested objects, type casting, projection, range filter...)
 - **Agnostic**: Works with any web frameworks (Flask, Sanic, AIOHTTP, Django ...) and/or MongoDB libraries (pymongo, motor, ...)
 - **Simple**: ~500 LOC, Python typing
 - **Tested**: 100% code coverage
+
 
 ## Installation:
 ```shell script
@@ -227,6 +228,29 @@ mongodb_query: Dict[str, Any] = mqm(
 #   'skip': 0,
 #   'limit': 0
 #}
+```
+
+#### Range filter:
+- Useful to filter fields to return in each records by range.
+- No error was handle by this library for range filter
+
+```python
+from typing import Dict, Any
+
+from mongo_queries_manager import mqm
+
+query_result: Dict[str, Any] = mqm(string_query="price>5&price<5")
+
+# {
+# 'filter':
+# {
+#   'price': {'$gt': 5.0, '$lt': 5.0},
+#   },
+#   'sort': None,
+#   'projection': None,
+#   'skip': 0,
+#   'limit': 0
+# }
 ```
 
 #### Custom caster:
