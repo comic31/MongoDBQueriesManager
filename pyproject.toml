@@ -56,16 +56,15 @@ dateparser = { version = "^1.0.0", optional = true }
 [tool.poetry.extras]
 dateparser = ["dateparser"]
 
-
 # Tests dependencies
 [tool.poetry.group.tests]
 optional = true
 
 [tool.poetry.group.tests.dependencies]
 pytest = ">=6.2.0,<8.0.0"
-tox = "^3.20.0"
 coverage = {version = ">=6.0.0,<7.0.0", extras = ["toml"]}
 pymongo = "^4.0.0"
+nox = "^2022.8.7"
 
 
 # Format dependencies
