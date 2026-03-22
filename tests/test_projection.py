@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import pytest
-
 from mongo_queries_manager import ProjectionError, mqm
 
 
@@ -43,9 +42,7 @@ class TestProjection:
         }
 
     def test_embedded_projection_1(self) -> None:
-        query_result = mqm(
-            string_query="fields=settings.notif&populate=user", populate=True
-        )
+        query_result = mqm(string_query="fields=settings.notif&populate=user", populate=True)
 
         assert query_result == {
             "filter": {},
@@ -79,12 +76,7 @@ class TestProjection:
         }
 
     def test_complex_projection_1(self) -> None:
-        query_result = mqm(
-            string_query=(
-                'fields={"games": {"$elemMatch":{"score": {"$gt":'
-                " 5}}}},joined,lastLogin"
-            )
-        )
+        query_result = mqm(string_query=('fields={"games": {"$elemMatch":{"score": {"$gt": 5}}}},joined,lastLogin'))
 
         assert query_result == {
             "filter": {},
@@ -100,11 +92,6 @@ class TestProjection:
 
     def test_complex_projection_error(self) -> None:
         with pytest.raises(ProjectionError) as excinfo:
-            _ = mqm(
-                string_query=(
-                    'fields={"games": {"$elemMatch":{"score": {"$gt":'
-                    " 5}}},joined,lastLogin"
-                )
-            )
+            _ = mqm(string_query=('fields={"games": {"$elemMatch":{"score": {"$gt": 5}}},joined,lastLogin'))
 
         assert excinfo.value.__str__() == "Fail to decode projection"

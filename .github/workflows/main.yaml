@@ -5,7 +5,7 @@ on:
     paths-ignore:
       - 'examples/**'
     branches:
-      - master
+      - main
       - develop
   pull_request:
     paths-ignore:
@@ -27,107 +27,94 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
     defaults:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
 
       - name: Setup up workflow test directory
         run: mkdir ./reports
 
-      - name: Upgrade Pip and install dev dependencies
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.10.12"
+
+      - name: Install dev dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install setuptools wheel poetry
-          poetry config virtualenvs.create false
-          poetry install --with tests,lint,type,format -v
+          uv sync --locked --all-groups --dev
 
       - name: Run mypy
-        run: mypy mongo_queries_manager
+        run: uv run mypy mongo_queries_manager
         if: ${{ always() }}
 
-      - name: Run pylint
-        run: pylint mongo_queries_manager
+      - name: Run ruff check
+        run: uv run ruff check mongo_queries_manager
         if: ${{ always() }}
 
-      - name: Run flake8
-        run: flake8 mongo_queries_manager --format=html --htmldir=./reports/flake8-${{ matrix.python }}
-        if: ${{ always() }}
-
-      - name: Tar flake8 artifact
-        run: tar -cvf flake8-${{ matrix.python }}.tar ./reports/flake8-${{ matrix.python }}
-
-      - name: Archive flake8 artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: flake8-${{ matrix.python }}
-          path: flake8-${{ matrix.python }}.tar
-
-      - name: Run black
-        run: black mongo_queries_manager --check
-        if: ${{ always() }}
-
-      - name: Run Isort
-        run: isort mongo_queries_manager --check
+      - name: Run ruff format
+        run: uv run ruff format --check mongo_queries_manager
         if: ${{ always() }}
 
       - name: Run Pytest without extra
-        run: coverage run --data-file=./reports/.coverage.without.extra -m pytest --junitxml=./reports/junit-results-without-extra-${{ matrix.python }}.xml --junit-prefix=without-extra-${{ matrix.python }} -vv
+        run: uv run coverage run --data-file=./reports/.coverage.without.extra -m pytest --junitxml=./reports/junit-results-without-extra-${{ matrix.python }}.xml --junit-prefix=without-extra-${{ matrix.python }} -vv
         if: ${{ always() }}
 
       - name: Archive Pytest artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: junit-results-without-extra-${{ matrix.python }}
           path: ./reports/junit-results-without-extra-${{ matrix.python }}.xml
 
       - name: Install dateparser dependencies
         run: |
-          poetry install -E dateparser -v
+          uv sync --locked --all-extras --all-groups --dev
 
       - name: Run Pytest with extra
-        run: coverage run --data-file=./reports/.coverage.with.extra -m pytest --junitxml=./reports/junit-results-with-extra-${{ matrix.python }}.xml --junit-prefix=with-extra-${{ matrix.python }} -vv
+        run: uv run coverage run --data-file=./reports/.coverage.with.extra -m pytest --junitxml=./reports/junit-results-with-extra-${{ matrix.python }}.xml --junit-prefix=with-extra-${{ matrix.python }} -vv
         if: ${{ always() }}
 
       - name: Archive Pytest artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: junit-results-with-extra-${{ matrix.python }}
           path: ./reports/junit-results-with-extra-${{ matrix.python }}.xml
 
       - name: Combine coverage
-        run: coverage combine --append --data-file=./reports/.coverage.full ./reports/.coverage.without.extra ./reports/.coverage.with.extra
+        run: uv run coverage combine --append --data-file=./reports/.coverage.full ./reports/.coverage.without.extra ./reports/.coverage.with.extra
 
       - name: Generate coverage HTML
-        run: coverage html --data-file=./reports/.coverage.full --directory=./reports/${{ matrix.python }}-coverage-full-html
+        run: uv run coverage html --data-file=./reports/.coverage.full --directory=./reports/${{ matrix.python }}-coverage-full-html
 
       - name: Tar files
         run: tar -cvf ${{ matrix.python }}-coverage-full-html.tar ./reports/${{ matrix.python }}-coverage-full-html
 
       - name: Archive code coverage HTML results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.python }}-coverage-full-html
           path: ${{ matrix.python }}-coverage-full-html.tar
 
       - name: Generate coverage XML
-        run: coverage xml --data-file=./reports/.coverage.full -o ./reports/coverage-${{ matrix.python }}-full.xml
+        run: uv run coverage xml --data-file=./reports/.coverage.full -o ./reports/coverage-${{ matrix.python }}-full.xml
 
       - name: Archive code coverage XML results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-${{ matrix.python }}-full
           path: ./reports/coverage-${{ matrix.python }}-full.xml
 
       - name: Send code coverage to codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           directory: ./reports
           files: coverage-${{ matrix.python }}-full.xml

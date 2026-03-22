@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import pytest
-
 from mongo_queries_manager import SkipError, mqm
 
 

@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-# Copyright (c) Modos Team, 2020
+# Copyright (c) Dangla Théo, 2026
 
-""" MongoDBQueriesManager module """
+"""MongoDBQueriesManager module.
+
+This module contain all methods to convert string query to MongoDB query.
+"""
 
 from __future__ import annotations
 
 import json
 import re
-
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Pattern
-
+from re import Pattern
+from typing import Any
 
 try:
     from dateparser import parse
@@ -21,10 +24,9 @@ try:
         Args:
             date (str): Date as string format.
 
-         Returns:
+        Returns:
             Optional[datetime]: Cast value.
         """
-
         return parse(date, languages=["fr", "en"]) or date
 
 except ModuleNotFoundError:
@@ -35,7 +37,7 @@ except ModuleNotFoundError:
         Args:
             date (str): Date as string format.
 
-         Returns:
+        Returns:
             Optional[datetime]: Cast value.
         """
         try:
@@ -117,9 +119,7 @@ class MongoDBQueriesManager:
             r"^[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T|"
             r" )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$"
         ): _date_parse,
-        re.compile(
-            r"^[A-Za-z ]+(?=(,?,))(?:\1[A-Za-z ]+)+$"
-        ): lambda list_value: list_value.split(","),
+        re.compile(r"^[A-Za-z ]+(?=(,?,))(?:\1[A-Za-z ]+)+$"): lambda list_value: list_value.split(","),
         re.compile(
             r"\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)"
             r"\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)"
@@ -133,6 +133,7 @@ class MongoDBQueriesManager:
     custom_cast_dict: dict[str, Callable[[Any], Any]] | None
 
     def __init__(self, casters: dict[str, Callable[[Any], Any]] | None = None) -> None:
+        """Initialize MongoDBQueriesManager class."""
         self.custom_cast_dict = casters
 
     def filter_logic(self, filter_params: str) -> dict[str, Any]:
@@ -150,9 +151,7 @@ class MongoDBQueriesManager:
             try:
                 key, value = filter_params.split(operator)
             except ValueError as err:
-                raise FilterError(
-                    f"Fail to split filter {filter_params} with operator {operator}"
-                ) from err
+                raise FilterError(f"Fail to split filter {filter_params} with operator {operator}") from err
         else:
             key, value = "", filter_params
 
@@ -197,9 +196,7 @@ class MongoDBQueriesManager:
                     try:
                         casted_value = func(value.replace(f"{rule}(", "")[:-1])
                     except Exception as err:
-                        raise CustomCasterFail(
-                            f"Fail to cast {value} with caster {rule}"
-                        ) from err
+                        raise CustomCasterFail(f"Fail to cast {value} with caster {rule}") from err
 
                     return casted_value
 
@@ -207,9 +204,8 @@ class MongoDBQueriesManager:
             if isinstance(regex, Pattern):
                 if regex.match(value):
                     return cast(value)
-            else:
-                if regex == value.lower():
-                    return cast(value)
+            elif regex == value.lower():
+                return cast(value)
         return value
 
     @staticmethod
@@ -316,9 +312,7 @@ class MongoDBQueriesManager:
         return skip_value
 
     @classmethod
-    def _iter_on_population(
-        cls, population: list[dict[str, Any]], field: str, sign: int
-    ) -> bool:
+    def _iter_on_population(cls, population: list[dict[str, Any]], field: str, sign: int) -> bool:
         """Used to add projection into population dict.
 
         Args:
@@ -351,9 +345,7 @@ class MongoDBQueriesManager:
         return False
 
     @classmethod
-    def projection_logic(
-        cls, projection_param: str, population: list[dict[str, Any]] | None
-    ) -> dict[str, Any] | None:
+    def projection_logic(cls, projection_param: str, population: list[dict[str, Any]] | None) -> dict[str, Any] | None:
         """Convert projection query into MongoDB format.
 
         Notes:
@@ -389,9 +381,7 @@ class MongoDBQueriesManager:
             elif param.startswith("{") and param.endswith("}"):
                 try:
                     json_value = json.loads(param)
-                    projection_params_final[next(iter(json_value))] = json_value[
-                        next(iter(json_value))
-                    ]
+                    projection_params_final[next(iter(json_value))] = json_value[next(iter(json_value))]
                 except Exception as err:
                     raise ProjectionError("Fail to decode projection") from err
             else:
@@ -399,9 +389,7 @@ class MongoDBQueriesManager:
         return projection_params_final if projection_params_final else None
 
     @classmethod
-    def format_populate_value(
-        cls, mongodb_query: dict[str, Any], population_value: str
-    ) -> None:
+    def format_populate_value(cls, mongodb_query: dict[str, Any], population_value: str) -> None:
         """Convert population query into dict format.
 
         Args:
@@ -414,15 +402,11 @@ class MongoDBQueriesManager:
         if population_value.find(".") >= 0:
             cls._iter_on_populate_value(mongodb_query, population_value)
         else:
-            mongodb_query["population"].append(
-                {"path": population_value, "projection": None}
-            )
+            mongodb_query["population"].append({"path": population_value, "projection": None})
 
     @classmethod
-    def _iter_on_populate_value(
-        cls, mongodb_query: dict[str, Any], population_value: str
-    ) -> None:
-        """Used into format_populate_value method (split to respect the pylint config)
+    def _iter_on_populate_value(cls, mongodb_query: dict[str, Any], population_value: str) -> None:
+        """Used into format_populate_value method (split to respect the pylint config).
 
         Args:
             mongodb_query (Dict[str, Any]): The actual mongodb query
@@ -439,13 +423,9 @@ class MongoDBQueriesManager:
                         population["population"] = []
 
                     if sub_path.find(".") >= 0:
-                        cls._iter_on_sub_populate_value(
-                            population=population, sub_path=sub_path
-                        )
+                        cls._iter_on_sub_populate_value(population=population, sub_path=sub_path)
                     else:
-                        population["population"].append(
-                            {"path": sub_path, "projection": None}
-                        )
+                        population["population"].append({"path": sub_path, "projection": None})
                     break
             else:
                 raise LogicalPopulationError("Fail to find logical population item")
@@ -453,10 +433,8 @@ class MongoDBQueriesManager:
             raise LogicalPopulationError("Fail to find logical population item")
 
     @classmethod
-    def _iter_on_sub_populate_value(
-        cls, population: dict[str, Any], sub_path: str
-    ) -> None:
-        """Used into _iter_on_populate_value method (split to respect the pylint config)
+    def _iter_on_sub_populate_value(cls, population: dict[str, Any], sub_path: str) -> None:
+        """Used into _iter_on_populate_value method (split to respect the pylint config).
 
         Args:
             population (Dict[str, Any]): The actual population
@@ -469,15 +447,11 @@ class MongoDBQueriesManager:
         for sub_population in population["population"]:
             if path == sub_population["path"]:
                 if sub_path.find(".") >= 0:
-                    cls.format_populate_value(
-                        mongodb_query=sub_population, population_value=sub_path
-                    )
+                    cls.format_populate_value(mongodb_query=sub_population, population_value=sub_path)
                 else:
                     if "population" not in sub_population:
                         sub_population["population"] = []
-                    sub_population["population"].append(
-                        {"path": sub_path, "projection": None}
-                    )
+                    sub_population["population"].append({"path": sub_path, "projection": None})
                 break
         else:
             raise LogicalSubPopulationError("Fail to find logical sub population item")

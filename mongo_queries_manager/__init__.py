@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-# Copyright (c) Modos Team, 2020
+# Copyright (c) Dangla Théo, 2026
 
-""" MongoDBQueriesManager """
+"""MongoDBQueriesManager module."""
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 from urllib import parse
 
+from mongo_queries_manager.helpers import is_blacklisted_value, parse_query_operation
 from mongo_queries_manager.mongodb_queries_manager import (
     CustomCasterFail,
     FilterError,
@@ -21,7 +23,6 @@ from mongo_queries_manager.mongodb_queries_manager import (
     SkipError,
     TextOperatorError,
 )
-
 
 __version__ = "0.2.2"
 
@@ -86,60 +87,19 @@ def mqm(
         for arg in args:
             if arg.startswith("populate=") and arg != "populate=":
                 populates_values = (
-                    arg.split("=")[1].split(",")
-                    if arg.split("=")[1].find(",") > 0
-                    else [arg.split("=")[1]]
+                    arg.split("=")[1].split(",") if arg.split("=")[1].find(",") > 0 else [arg.split("=")[1]]
                 )
 
         for populate_value in sorted(populates_values, key=_sort_population):
-            mongodb_queries_mgr.format_populate_value(
-                mongodb_query, population_value=populate_value
-            )
+            mongodb_queries_mgr.format_populate_value(mongodb_query, population_value=populate_value)
 
     for arg in args:
-        if blacklist:
-            found: bool = False
-            for blacklist_value in blacklist:
-                if arg.startswith(f"{blacklist_value}="):
-                    found = True
-                    break
-            if found:
-                continue
+        # Skip blacklisted value
+        if blacklist and is_blacklisted_value(blacklist, arg):
+            continue
 
-        if arg.startswith("sort="):
-            mongodb_query["sort"] = mongodb_queries_mgr.sort_logic(sort_params=arg)
-        elif arg.startswith("limit="):
-            mongodb_query["limit"] = mongodb_queries_mgr.limit_logic(limit_param=arg)
-        elif arg.startswith("skip="):
-            mongodb_query["skip"] = mongodb_queries_mgr.skip_logic(skip_param=arg)
-        elif arg.startswith("fields="):
-            if populate:
-                mongodb_query["projection"] = mongodb_queries_mgr.projection_logic(
-                    projection_param=arg, population=mongodb_query["population"]
-                )
-            else:
-                mongodb_query["projection"] = mongodb_queries_mgr.projection_logic(
-                    projection_param=arg, population=None
-                )
-        elif arg.startswith("$text="):
-            mongodb_query["filter"] = {
-                **mongodb_query["filter"],
-                "$text": {
-                    "$search": mongodb_queries_mgr.text_operator_logic(text_param=arg)
-                },
-            }
-        elif arg.startswith("populate="):
-            pass
-        elif arg != "":
-            for key, sub_filter in mongodb_queries_mgr.filter_logic(
-                filter_params=arg
-            ).items():
-                if key in mongodb_query["filter"]:
-                    mongodb_query["filter"][key] = {
-                        **mongodb_query["filter"][key],
-                        **sub_filter,
-                    }
-                else:
-                    mongodb_query["filter"][key] = sub_filter
+        mongodb_query = parse_query_operation(
+            mongodb_query=mongodb_query, arg=arg, mongodb_queries_mgr=mongodb_queries_mgr, populate=populate
+        )
 
     return mongodb_query
