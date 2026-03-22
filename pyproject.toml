@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "mongo-queries-manager"
-version = "1.0.0"
+version = "1.0.1"
 description = "Convert query parameters from API urls to MongoDB queries !"
 authors = [{ name = "Theo Dangla", email = "theodangla32@gmail.com" }]
 requires-python = ">=3.10,<4"

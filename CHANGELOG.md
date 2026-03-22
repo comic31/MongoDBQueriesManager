@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1
+* Changed:
+    - Upgrade all dependencies
+    - Add latest python support
+    - Drop python support version (3.7 / 3.8 / 3.9)
+    - Migrate to uv instead of poetry
+    - Add ruff as linter & formater
+
 ## 1.0.0
 * Added:
     - Support range filter

@@ -24,7 +24,7 @@ from mongo_queries_manager.mongodb_queries_manager import (
     TextOperatorError,
 )
 
-__version__ = "0.2.2"
+__version__ = "1.0.1"
 
 __all__ = [
     "mqm",
