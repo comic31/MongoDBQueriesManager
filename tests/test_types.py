@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import re
-
 from datetime import datetime, timezone
 
 from mongo_queries_manager import mqm
@@ -85,9 +84,7 @@ class TestTypes:
         query_result = mqm(string_query="created_at=2016-01-01T00:00:00.000000+00:00")
 
         assert query_result == {
-            "filter": {
-                "created_at": datetime(year=2016, month=1, day=1, tzinfo=timezone.utc)
-            },
+            "filter": {"created_at": datetime(year=2016, month=1, day=1, tzinfo=timezone.utc)},
             "sort": None,
             "skip": 0,
             "limit": 0,

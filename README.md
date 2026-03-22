@@ -1,10 +1,10 @@
 # MongoDBQueriesManager
-[![Codecov](https://img.shields.io/codecov/c/github/comic31/MongoDBQueriesManager?style=for-the-badge)](https://app.codecov.io/gh/comic31/MongoDBQueriesManager)
-[![Main workflow](https://img.shields.io/github/workflow/status/comic31/MongoDBQueriesManager/Main%20workflow?style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/actions/workflows/main.yaml)
-[![PyPI](https://img.shields.io/pypi/v/mongo-queries-manager?style=for-the-badge)](https://pypi.org/project/mongo-queries-manager/)
-[![GitHub](https://img.shields.io/github/license/comic31/MongoDBQueriesManager?style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/blob/main/LICENSE)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/comic31/MongoDBQueriesManager/main.yaml?branch=main&style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/actions/workflows/main.yaml)
+[![PyPI - Version](https://img.shields.io/pypi/v/mongo-queries-manager?pypiBaseUrl=https%3A%2F%2Fpypi.org%2F&style=for-the-badge)](https://pypi.org/project/mongo-queries-manager/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mongo-queries-manager?style=for-the-badge)](https://pypi.org/project/mongo-queries-manager/)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg?style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/blob/main/code_of_conduct.md)
+[![Codecov](https://img.shields.io/codecov/c/github/comic31/MongoDBQueriesManager?style=for-the-badge)](https://app.codecov.io/gh/comic31/MongoDBQueriesManager)
+[![GitHub License](https://img.shields.io/github/license/comic31/MongoDBQueriesManager?style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/blob/main/LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v3.0%20adopted-ff69b4.svg?style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/blob/main/code_of_conduct.md)
 
 Convert query parameters from API urls to MongoDB queries !
 
@@ -34,6 +34,10 @@ pipenv install mongo-queries-manager['dateparser']
 
 poetry add mongo-queries-manager
 poetry add mongo-queries-manager['dateparser']
+
+# OR
+uv add mongo-queries-manager
+uv add mongo-queries-manager --optional dateparser
 ```
 
 ## Usages:
@@ -298,11 +302,8 @@ query_result: Dict[str, Any] = mqm(string_query="price=string(5)&name=John&in_st
 ### Install all development dependencies
 
 ```shell
-# Initialize a new virtual environment
-poetry shell
-
 # Install dev dependencies
-poetry install --with format,lint,type,tools,tests -E dateparser
+uv sync --locked --all-extras --all-groups --dev
 
 # Run tests
 nox

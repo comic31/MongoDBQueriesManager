@@ -6,9 +6,7 @@ from __future__ import annotations
 from datetime import datetime
 
 import pytest
-
 from mongo_queries_manager import mqm
-
 
 _PYTEST_HAS_DATEPARSER: bool
 try:
@@ -35,9 +33,7 @@ def test_datetime_query_with_dateparser_lib() -> None:
     }
 
 
-@pytest.mark.skipif(
-    _PYTEST_HAS_DATEPARSER is True, reason="Test skipped because dateparser is install."
-)
+@pytest.mark.skipif(_PYTEST_HAS_DATEPARSER is True, reason="Test skipped because dateparser is install.")
 def test_datetime_query_without_dateparser_lib() -> None:
     query_result = mqm(string_query="date=2022-10-29 ", blacklist=[])
 

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import pytest
-
 from mongo_queries_manager import LogicalPopulationError, LogicalSubPopulationError, mqm
 
 
@@ -115,9 +114,7 @@ class TestPopulation:
                                 {
                                     "path": "info",
                                     "projection": None,
-                                    "population": [
-                                        {"path": "rates", "projection": None}
-                                    ],
+                                    "population": [{"path": "rates", "projection": None}],
                                 }
                             ],
                         }
@@ -181,9 +178,7 @@ class TestPopulation:
                         {
                             "path": "settings",
                             "projection": None,
-                            "population": [
-                                {"path": "notifications", "projection": None}
-                            ],
+                            "population": [{"path": "notifications", "projection": None}],
                         },
                     ],
                 }
@@ -207,10 +202,7 @@ class TestPopulation:
 
     def test_multi_population_with_multi_projection(self) -> None:
         query_result = mqm(
-            string_query=(
-                "fields=-created_at,-updated_at,hives.label,hives._id,"
-                "data.temperature&populate=hives,data"
-            ),
+            string_query=("fields=-created_at,-updated_at,hives.label,hives._id,data.temperature&populate=hives,data"),
             populate=True,
         )
 
@@ -272,9 +264,7 @@ class TestPopulation:
     def test_bad_population_logic_2(self) -> None:
         with pytest.raises(LogicalPopulationError) as excinfo:
             _ = mqm(
-                string_query=(
-                    "populate=service,service.description,service.description.toto.titi"
-                ),
+                string_query=("populate=service,service.description,service.description.toto.titi"),
                 populate=True,
             )
 
@@ -284,8 +274,7 @@ class TestPopulation:
         with pytest.raises(LogicalSubPopulationError) as excinfo:
             _ = mqm(
                 string_query=(
-                    "populate=service,service.description,"
-                    "service.description.info,service.descriptions.info"
+                    "populate=service,service.description,service.description.info,service.descriptions.info"
                 ),
                 populate=True,
             )
