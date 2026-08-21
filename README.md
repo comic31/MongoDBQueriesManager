@@ -1,3 +1,5 @@
+
+
 # MongoDBQueriesManager
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/comic31/MongoDBQueriesManager/main.yaml?branch=main&style=for-the-badge)](https://github.com/comic31/MongoDBQueriesManager/actions/workflows/main.yaml)
 [![PyPI - Version](https://img.shields.io/pypi/v/mongo-queries-manager?pypiBaseUrl=https%3A%2F%2Fpypi.org%2F&style=for-the-badge)](https://pypi.org/project/mongo-queries-manager/)
@@ -49,7 +51,7 @@ Converts `string_query` into a MongoDB query dict.
 
 ##### Arguments
 - `string_query`: query string of the requested API URL (ie, `frist_name=John&limit=10`), Works with url encoded. [required]
-- `casters`: Custom caster dict, used to define custom type (ie, `casters={'string': str}` / `price=string(5.5)` -> `{'price': '5'}`) [optional]
+- `casters`: Custom caster dict, used to define custom type (ie, `casters={'string': str}` / `price=string(5.5)` -> `{'price': '5.5'}`) [optional]
 - `blacklist`: Custom blacklist word, used to ignore specific value from query (ie, `blacklist=[where]` / `company=id,where=43.60,1.44,` -> `{'company': 'id'}`) [optional]
 - `populate`: A boolean value, used to activate the population logic (add a population field into returned dict)
 
